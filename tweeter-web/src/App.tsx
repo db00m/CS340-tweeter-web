@@ -12,10 +12,10 @@ import Login from "./components/authentication/login/Login";
 import Register from "./components/authentication/register/Register";
 import MainLayout from "./components/mainLayout/MainLayout";
 import Toaster from "./components/toaster/Toaster";
-import FolloweesScroller from "./components/mainLayout/FolloweesScroller";
-import FollowersScroller from "./components/mainLayout/FollowersScroller";
 import FeedScroller from "./components/mainLayout/FeedScroller";
 import StoryScroller from "./components/mainLayout/StoryScroller";
+import UserItemScroller from "./components/mainLayout/UserItemScroller";
+import {AuthToken, FakeData, User} from "tweeter-shared";
 
 const App = () => {
   const { currentUser, authToken } = useContext(UserInfoContext);
@@ -41,14 +41,24 @@ const App = () => {
 const AuthenticatedRoutes = () => {
   const { displayedUser } = useContext(UserInfoContext);
 
+  const handleLoadMore = async (
+    authToken: AuthToken,
+    userAlias: string,
+    pageSize: number,
+    lastUser: User | null
+  ): Promise<[User[], boolean]> => {
+    // TODO: Replace with the result of calling server
+    return FakeData.instance.getPageOfUsers(lastUser, pageSize, userAlias);
+  };
+
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route index element={<Navigate to={`/feed/${displayedUser!.alias}`} />} />
         <Route path="feed/:displayedUser" element={<FeedScroller />} />
         <Route path="story/:displayedUser" element={<StoryScroller />} />
-        <Route path="followees/:displayedUser" element={<FolloweesScroller />} />
-        <Route path="followers/:displayedUser" element={<FollowersScroller />} />
+        <Route path="followees/:displayedUser" element={<UserItemScroller itemDescription="followees" featureUrl="/followees" onLoadMore={handleLoadMore} />} />
+        <Route path="followers/:displayedUser" element={<UserItemScroller itemDescription="followers" featureUrl="/followers" onLoadMore={handleLoadMore} />} />
         <Route path="logout" element={<Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={`/feed/${displayedUser!.alias}`} />} />
       </Route>
