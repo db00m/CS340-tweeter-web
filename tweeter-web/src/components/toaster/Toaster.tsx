@@ -1,21 +1,19 @@
 import "./Toaster.css";
 import { useEffect } from "react";
-import { useContext } from "react";
-import { ToastListContext } from "./ToastContexts";
 import { Toast } from "react-bootstrap";
-import { useMessageActions } from "./MessageHooks";
+import {useMessageActions, useMessageList} from "./MessageHooks";
 
 interface Props {
   position: string;
 }
 
 const Toaster = ({ position }: Props) => {
-  const toastList = useContext(ToastListContext);
+  const messageList = useMessageList();
   const { deleteMessage } = useMessageActions();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (toastList.length) {
+      if (messageList.length) {
         deleteExpiredToasts();
       }
     }, 1000);
@@ -24,12 +22,12 @@ const Toaster = ({ position }: Props) => {
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toastList]);
+  }, [messageList]);
 
   const deleteExpiredToasts = () => {
     const now = Date.now();
 
-    for (let toast of toastList) {
+    for (let toast of messageList) {
       if (
         toast.expirationMillisecond > 0 &&
         toast.expirationMillisecond < now
@@ -42,7 +40,7 @@ const Toaster = ({ position }: Props) => {
   return (
     <>
       <div className={`toaster-container ${position}`}>
-        {toastList.map((toast, i) => (
+        {messageList.map((toast, i) => (
           <Toast
             id={toast.id}
             key={i}
