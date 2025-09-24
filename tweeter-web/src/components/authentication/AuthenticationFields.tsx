@@ -4,7 +4,7 @@ interface Props {
     onEnter: () => void;
     onPasswordChange: (value: string) => void;
     onAliasChange: (value: string) => void;
-    isBottom?: string;
+    isBottom: boolean;
 }
 
 const AuthenticationFields = ({ onEnter, onPasswordChange, onAliasChange, isBottom }: Props) => {
