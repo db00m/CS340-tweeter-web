@@ -3,9 +3,8 @@ import { useContext } from "react";
 import { UserInfoContext, UserInfoActionsContext } from "./UserInfoContexts";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ToastActionsContext } from "../toaster/ToastContexts";
 import { AuthToken, FakeData, User } from "tweeter-shared";
-import { ToastType } from "../toaster/Toast";
+import {useMessageActions} from "../toaster/MessageHooks";
 
 const UserInfo = () => {
   const [isFollower, setIsFollower] = useState(false);
@@ -13,7 +12,7 @@ const UserInfo = () => {
   const [followerCount, setFollowerCount] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { displayToast, deleteToast } = useContext(ToastActionsContext);
+  const { displayInfoMessage, displayErrorMessage, deleteMessage } = useMessageActions();
 
   const { currentUser, authToken, displayedUser } = useContext(UserInfoContext);
   const { setDisplayedUser } = useContext(UserInfoActionsContext);
@@ -44,10 +43,8 @@ const UserInfo = () => {
         );
       }
     } catch (error) {
-      displayToast(
-        ToastType.Error,
+      displayErrorMessage(
         `Failed to determine follower status because of exception: ${error}`,
-        0
       );
     }
   };
@@ -68,10 +65,8 @@ const UserInfo = () => {
     try {
       setFolloweeCount(await getFolloweeCount(authToken, displayedUser));
     } catch (error) {
-      displayToast(
-        ToastType.Error,
-        `Failed to get followees count because of exception: ${error}`,
-        0
+      displayErrorMessage(
+        `Failed to get followees count because of exception: ${error}`
       );
     }
   };
@@ -91,10 +86,8 @@ const UserInfo = () => {
     try {
       setFollowerCount(await getFollowerCount(authToken, displayedUser));
     } catch (error) {
-      displayToast(
-        ToastType.Error,
-        `Failed to get followers count because of exception: ${error}`,
-        0
+      displayErrorMessage(
+        `Failed to get followers count because of exception: ${error}`
       );
     }
   };
@@ -127,8 +120,7 @@ const UserInfo = () => {
 
     try {
       setIsLoading(true);
-      followingUserToast = displayToast(
-        ToastType.Info,
+      followingUserToast = displayInfoMessage(
         `Following ${displayedUser!.name}...`,
         0
       );
@@ -142,13 +134,11 @@ const UserInfo = () => {
       setFollowerCount(followerCount);
       setFolloweeCount(followeeCount);
     } catch (error) {
-      displayToast(
-        ToastType.Error,
+      displayErrorMessage(
         `Failed to follow user because of exception: ${error}`,
-        0
       );
     } finally {
-      deleteToast(followingUserToast);
+      deleteMessage(followingUserToast);
       setIsLoading(false);
     }
   };
@@ -177,8 +167,7 @@ const UserInfo = () => {
 
     try {
       setIsLoading(true);
-      unfollowingUserToast = displayToast(
-        ToastType.Info,
+      unfollowingUserToast = displayInfoMessage(
         `Unfollowing ${displayedUser!.name}...`,
         0
       );
@@ -192,13 +181,11 @@ const UserInfo = () => {
       setFollowerCount(followerCount);
       setFolloweeCount(followeeCount);
     } catch (error) {
-      displayToast(
-        ToastType.Error,
-        `Failed to unfollow user because of exception: ${error}`,
-        0
+      displayErrorMessage(
+        `Failed to unfollow user because of exception: ${error}`
       );
     } finally {
-      deleteToast(unfollowingUserToast);
+      deleteMessage(unfollowingUserToast);
       setIsLoading(false);
     }
   };
