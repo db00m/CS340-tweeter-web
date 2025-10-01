@@ -51,7 +51,6 @@ export abstract class UserItemPresenter {
 
       this.view.setHasMoreItems(() => hasMore);
       this.lastItem = newItems[newItems.length - 1];
-      console.log(this.lastItem);
       this.view.addItems(newItems);
     } catch (error) {
       this.view.displayErrorMessage(
