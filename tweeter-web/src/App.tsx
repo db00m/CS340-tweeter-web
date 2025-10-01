@@ -14,7 +14,9 @@ import StatusScroller from "./components/mainLayout/StatusScroller";
 import UserItemScroller from "./components/mainLayout/UserItemScroller";
 import {AuthToken, FakeData, Status, User} from "tweeter-shared";
 import {useUserInfo} from "./components/userInfo/UserInfoHooks";
-import { UserItemPresenter, UserItemView } from "./presenter/UserItemPresenter";
+import { UserItemView } from "./presenter/UserItemPresenter";
+import { FolloweePresenter } from "./presenter/FolloweePresenter";
+import { FollowerPresenter } from "./presenter/FollowerPresenter";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -82,7 +84,7 @@ const AuthenticatedRoutes = () => {
             <UserItemScroller
               key={`followees-${displayedUser!.alias}`}
               featureUrl="/followees"
-              presenterFactory={(view: UserItemView) => new UserItemPresenter(view, 'followee')}
+              presenterFactory={(view: UserItemView) => new FolloweePresenter(view)}
             />
           }
         />
@@ -92,7 +94,7 @@ const AuthenticatedRoutes = () => {
             <UserItemScroller
               key={`followers-${displayedUser!.alias}`}
               featureUrl="/followers"
-              presenterFactory={(view: UserItemView) => new UserItemPresenter(view, 'follower')}
+              presenterFactory={(view: UserItemView) => new FollowerPresenter(view)}
 
             />
           }
