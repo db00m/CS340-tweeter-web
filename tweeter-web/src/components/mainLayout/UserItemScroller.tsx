@@ -15,7 +15,6 @@ interface Props {
 const UserItemScroller = ({ featureUrl, presenterFactory }: Props) => {
   const { displayErrorMessage } = useMessageActions();
   const [items, setItems] = useState<User[]>([]);
-  const [hasMoreItems, setHasMoreItems] = useState(true);
 
   const { displayedUser, authToken } = useUserInfo();
   const { setDisplayedUser } = useUserInfoActions();
@@ -24,8 +23,7 @@ const UserItemScroller = ({ featureUrl, presenterFactory }: Props) => {
   const listener: UserItemView = {
     addItems: (newItems: User[]) =>
       setItems((previousItems) => [...previousItems, ...newItems]),
-    displayErrorMessage,
-    setHasMoreItems
+    displayErrorMessage
   }
 
   const presenter = useMemo(() => presenterFactory(listener), []);
@@ -57,7 +55,7 @@ const UserItemScroller = ({ featureUrl, presenterFactory }: Props) => {
         className="pr-0 mr-0"
         dataLength={items.length}
         next={() => presenter.loadMoreItems(authToken!, displayedUser!.alias)}
-        hasMore={hasMoreItems}
+        hasMore={presenter.hasMoreItems}
         loader={<h4>Loading...</h4>}
       >
         {items.map((item, index) => (

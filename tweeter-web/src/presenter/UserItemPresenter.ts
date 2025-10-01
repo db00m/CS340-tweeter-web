@@ -1,41 +1,37 @@
 import { AuthToken, User } from "tweeter-shared";
 import { FollowService } from "../model.service/FollowService";
 import { UserService } from "../model.service/UserService";
-import { Dispatch, SetStateAction } from "react";
 
 export const PAGE_SIZE = 10;
 
 export interface UserItemView {
   addItems: (newItems: User[]) => void;
   displayErrorMessage: (message: string) => void;
-  setHasMoreItems: Dispatch<SetStateAction<boolean>>;
 }
 
-export abstract class UserItemPresenter {
+export class UserItemPresenter {
   private readonly _view: UserItemView;
   private readonly followService: FollowService;
   private readonly userService: UserService;
 
   private lastItem: User | null = null;
+  private _hasMoreItems: boolean = true;
 
-  private _userType = 'user';
+  private userType = 'user';
 
-  protected constructor(view: UserItemView) {
+  public constructor(view: UserItemView, userType: string) {
     this._view = view;
     this.followService = new FollowService();
     this.userService = new UserService();
+    this.userType = userType;
   }
 
   protected get view() {
     return this._view;
   }
 
-  protected set userType(userType: string) {
-    this._userType = userType;
-  }
-
   public reset() {
-    this.view.setHasMoreItems(() => false);
+    this._hasMoreItems = true;
     this.lastItem = null;
   }
 
@@ -49,12 +45,12 @@ export abstract class UserItemPresenter {
       );
 
 
-      this.view.setHasMoreItems(() => hasMore);
+      this._hasMoreItems = hasMore;
       this.lastItem = newItems[newItems.length - 1];
       this.view.addItems(newItems);
     } catch (error) {
       this.view.displayErrorMessage(
-        `Failed to load ${this._userType}s because of exception: ${error}`
+        `Failed to load ${this.userType}s because of exception: ${error}`
       );
     }
   };
@@ -65,4 +61,8 @@ export abstract class UserItemPresenter {
   ): Promise<User | null> {
     return await this.userService.getUser(authToken, alias)
   };
+
+  public get hasMoreItems() {
+    return this._hasMoreItems;
+  }
 }
