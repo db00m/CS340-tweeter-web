@@ -14,7 +14,7 @@ interface ToastActions {
   ) => string,
   deleteToast: (_toast: string) => void,
   deleteAllToasts: () => void,
-};
+}
 
 const defaultToastActions: ToastActions = {
   displayExistingToast: () => null,

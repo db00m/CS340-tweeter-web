@@ -32,4 +32,4 @@ export function makeToast(
       deleteAfterMillis > 0 ? Date.now() + deleteAfterMillis : 0,
     bootstrapClasses: bootstrapClasses
   };
-};
+}
