@@ -1,12 +1,13 @@
 import "./Login.css";
 import "bootstrap/dist/css/bootstrap.css";``
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import AuthenticationFields from "../AuthenticationFields";
 import {useMessageActions} from "../../toaster/MessageHooks";
 import {useUserInfoActions} from "../../userInfo/UserInfoHooks";
-import { LoginPresenter, LoginView } from "../../../presenter/LoginPresenter";
+import { LoginPresenter } from "../../../presenter/LoginPresenter";
+import { AuthenticationView } from "../../../presenter/AuthenticationView";
 
 interface Props {
   originalUrl?: string;
@@ -17,18 +18,19 @@ const Login = (props: Props) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
 
   const navigate = useNavigate();
   const { updateUserInfo } = useUserInfoActions();
   const { displayErrorMessage } = useMessageActions();
 
-  const listener: LoginView = {
+  const listener: AuthenticationView = {
     setIsLoading,
     updateUserInfo,
     navigate,
     displayErrorMessage
   }
-  const presenter = new LoginPresenter(listener, props.originalUrl);
+  const presenter = useMemo(() => new LoginPresenter(listener, props.originalUrl), []);
 
   const checkSubmitButtonStatus = (): boolean => {
     return !alias || !password;

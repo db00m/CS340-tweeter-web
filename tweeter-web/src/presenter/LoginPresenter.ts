@@ -1,26 +1,12 @@
-import { Dispatch, SetStateAction } from "react";
 import { UserService } from "../model.service/UserService";
-import { AuthToken, User } from "tweeter-shared";
-import { NavigateFunction } from "react-router-dom";
-
-export interface LoginView {
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
-  updateUserInfo: (
-    currentUser: User,
-    displayedUser: User | null,
-    authToken: AuthToken,
-    remember: boolean
-  ) => void,
-  navigate: NavigateFunction,
-  displayErrorMessage: (message: string) => void
-}
+import { AuthenticationView } from "./AuthenticationView";
 
 export class LoginPresenter {
-  private readonly _view: LoginView;
+  private readonly _view: AuthenticationView;
   private readonly _userService: UserService
   private readonly _originalUrl: string | undefined;
 
-  public constructor(view: LoginView, originalUrl: string | undefined) {
+  public constructor(view: AuthenticationView, originalUrl: string | undefined) {
     this._view = view;
     this._userService = new UserService();
     this._originalUrl = originalUrl;
