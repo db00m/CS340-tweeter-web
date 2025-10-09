@@ -6,7 +6,6 @@ import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import AuthenticationFields from "../AuthenticationFields";
 import {useMessageActions} from "../../toaster/MessageHooks";
 import {useUserInfoActions} from "../../userInfo/UserInfoHooks";
-import { AuthenticationView } from "../../../presenter/AuthenticationView";
 import { RegisterPresenter, RegisterView } from "../../../presenter/RegisterPresenter";
 
 const Register = () => {

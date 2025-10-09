@@ -17,6 +17,9 @@ import {useUserInfo} from "./components/userInfo/UserInfoHooks";
 import { UserItemView } from "./presenter/UserItemPresenter";
 import { FolloweePresenter } from "./presenter/FolloweePresenter";
 import { FollowerPresenter } from "./presenter/FollowerPresenter";
+import { StatusItemView } from "./presenter/StatusItemPresenter";
+import { FeedPresenter } from "./presenter/FeedPresenter";
+import { StoryPresenter } from "./presenter/StoryPresenter";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -64,6 +67,7 @@ const AuthenticatedRoutes = () => {
               itemDescription="feed"
               featureUrl="/feed"
               onLoadMore={handleLoadMoreStatuses}
+              presenterFactory={(listener: StatusItemView) => new FeedPresenter(listener)}
             />
           }
         />
@@ -75,6 +79,7 @@ const AuthenticatedRoutes = () => {
               itemDescription="story"
               featureUrl="/story"
               onLoadMore={handleLoadMoreStatuses}
+              presenterFactory={(listener: StatusItemView) => new StoryPresenter(listener)}
             />
           }
         />
