@@ -10,18 +10,11 @@ import { StatusItemPresenter, StatusItemView } from "../../presenter/StatusItemP
 export const PAGE_SIZE = 10;
 
 interface Props {
-  itemDescription: string;
   featureUrl: string;
-  onLoadMore: (
-    authToken: AuthToken,
-    userAlias: string,
-    pageSize: number,
-    lastItem: Status | null
-  ) => Promise<[Status[], boolean]>;
   presenterFactory: (listener: StatusItemView) => StatusItemPresenter;
 }
 
-const StatusScroller = ({ itemDescription, featureUrl, onLoadMore, presenterFactory }: Props) => {
+const StatusScroller = ({ featureUrl, presenterFactory }: Props) => {
   const { displayErrorMessage } = useMessageActions();
   const [items, setItems] = useState<Status[]>([]);
   const [hasMoreItems, setHasMoreItems] = useState(true);

@@ -12,7 +12,6 @@ import MainLayout from "./components/mainLayout/MainLayout";
 import Toaster from "./components/toaster/Toaster";
 import StatusScroller from "./components/mainLayout/StatusScroller";
 import UserItemScroller from "./components/mainLayout/UserItemScroller";
-import {AuthToken, FakeData, Status, User} from "tweeter-shared";
 import {useUserInfo} from "./components/userInfo/UserInfoHooks";
 import { UserItemView } from "./presenter/UserItemPresenter";
 import { FolloweePresenter } from "./presenter/FolloweePresenter";
@@ -45,16 +44,6 @@ const App = () => {
 const AuthenticatedRoutes = () => {
   const { displayedUser } = useUserInfo();
 
-  const handleLoadMoreStatuses = async (
-    authToken: AuthToken,
-    userAlias: string,
-    pageSize: number,
-    lastItem: Status | null
-  ): Promise<[Status[], boolean]> => {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
-  };
-
   return (
     <Routes>
       <Route element={<MainLayout />}>
@@ -64,9 +53,7 @@ const AuthenticatedRoutes = () => {
           element={
             <StatusScroller
               key={`feed-${displayedUser!.alias}`}
-              itemDescription="feed"
               featureUrl="/feed"
-              onLoadMore={handleLoadMoreStatuses}
               presenterFactory={(listener: StatusItemView) => new FeedPresenter(listener)}
             />
           }
@@ -76,9 +63,7 @@ const AuthenticatedRoutes = () => {
           element={
             <StatusScroller
               key={`story-${displayedUser!.alias}`}
-              itemDescription="story"
               featureUrl="/story"
-              onLoadMore={handleLoadMoreStatuses}
               presenterFactory={(listener: StatusItemView) => new StoryPresenter(listener)}
             />
           }
