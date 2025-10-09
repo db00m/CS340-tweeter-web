@@ -2,6 +2,7 @@ import "./Toaster.css";
 import { useEffect } from "react";
 import { Toast } from "react-bootstrap";
 import {useMessageActions, useMessageList} from "./MessageHooks";
+import { ToasterPresenter, ToasterView } from "../../presenter/ToasterPresenter";
 
 interface Props {
   position: string;
@@ -11,10 +12,13 @@ const Toaster = ({ position }: Props) => {
   const messageList = useMessageList();
   const { deleteMessage } = useMessageActions();
 
+  const listener: ToasterView = { deleteMessage };
+  const presenter: ToasterPresenter = new ToasterPresenter(listener);
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (messageList.length) {
-        deleteExpiredToasts();
+        presenter.deleteExpiredToasts(messageList);
       }
     }, 1000);
 
@@ -23,19 +27,6 @@ const Toaster = ({ position }: Props) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messageList]);
-
-  const deleteExpiredToasts = () => {
-    const now = Date.now();
-
-    for (let toast of messageList) {
-      if (
-        toast.expirationMillisecond > 0 &&
-        toast.expirationMillisecond < now
-      ) {
-        deleteMessage(toast.id);
-      }
-    }
-  };
 
   return (
     <>
