@@ -1,4 +1,4 @@
-import { AuthToken, FakeData, Status, User } from "tweeter-shared";
+import { AuthToken, Status, User } from "tweeter-shared";
 import { PAGE_SIZE } from "../components/mainLayout/StatusScroller";
 import { StatusService } from "../model.service/StatusService";
 import { Dispatch, SetStateAction } from "react";

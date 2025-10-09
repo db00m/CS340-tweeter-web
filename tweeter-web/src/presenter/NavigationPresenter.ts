@@ -1,5 +1,5 @@
 import { UserService } from "../model.service/UserService";
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { AuthToken, User } from "tweeter-shared";
 import { NavigateFunction } from "react-router-dom";
 
 export interface NavigationView {
