@@ -1,37 +1,32 @@
 import { UserService } from "../model.service/UserService";
 import { AuthToken } from "tweeter-shared";
 import { NavigateFunction } from "react-router-dom";
+import { Presenter, View } from "./Presenter";
 
-export interface NavBarView {
+export interface NavBarView extends View {
   displayInfoMessage: (message: string, duration: number) => string;
-  displayErrorMessage: (message: string) => void;
   deleteMessage: (messageId: string) => void;
   clearUserInfo: () => void;
   navigate: NavigateFunction
 }
 
-export class NavBarPresenter {
-  private view: NavBarView;
+export class NavBarPresenter extends Presenter<NavBarView> {
   private userService: UserService;
 
   public constructor(view: NavBarView) {
-    this.view = view;
+    super(view);
     this.userService = new UserService();
   }
 
   async logOut(authToken: AuthToken) {
     const loggingOutToastId = this.view.displayInfoMessage("Logging Out...", 0);
 
-    try {
+    await this.doFailureReportingOperation(async () => {
       await this.userService.logout(authToken);
 
       this.view.deleteMessage(loggingOutToastId);
       this.view.clearUserInfo();
       this.view.navigate("/login");
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to log user out because of exception: ${error}`
-      );
-    }
+    }, "log user out");
   };
 }

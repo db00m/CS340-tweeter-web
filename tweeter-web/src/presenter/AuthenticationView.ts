@@ -1,8 +1,9 @@
 import { Dispatch, SetStateAction } from "react";
 import { AuthToken, User } from "tweeter-shared";
 import { NavigateFunction } from "react-router-dom";
+import { View } from "./Presenter";
 
-export interface AuthenticationView {
+export interface AuthenticationView extends View {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   updateUserInfo: (
     currentUser: User,
@@ -10,6 +11,5 @@ export interface AuthenticationView {
     authToken: AuthToken,
     remember: boolean
   ) => void,
-  navigate: NavigateFunction,
-  displayErrorMessage: (message: string) => void
+  navigate: NavigateFunction;
 }
