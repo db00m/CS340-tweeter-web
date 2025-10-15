@@ -1,11 +1,15 @@
-import { UserItemPresenter, UserItemView } from "./UserItemPresenter";
-
+import { UserItemPresenter } from "./UserItemPresenter";
+import { PagedItemView } from "./PagedItemPresenter";
+import { User } from "tweeter-shared";
 
 export class FolloweePresenter extends UserItemPresenter {
 
-  public constructor(view: UserItemView) {
+  public constructor(view: PagedItemView<User>) {
     super(view);
-    this.userType = "followee";
+  }
+
+  protected itemDescription(): string {
+    return "followee";
   }
 
 }

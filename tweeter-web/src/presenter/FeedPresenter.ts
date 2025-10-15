@@ -1,10 +1,15 @@
-import { StatusItemPresenter, StatusItemView } from "./StatusItemPresenter";
+import { StatusItemPresenter } from "./StatusItemPresenter";
+import { PagedItemView } from "./PagedItemPresenter";
+import { Status } from "tweeter-shared";
 
 export class FeedPresenter extends StatusItemPresenter {
 
-  public constructor(view: StatusItemView) {
+  public constructor(view: PagedItemView<Status>) {
     super(view);
-    this.itemDescription = "feed";
+  }
+
+  protected itemDescription(): string {
+    return "feed";
   }
 
 }
