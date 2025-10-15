@@ -1,15 +1,14 @@
 import { UserService } from "../model.service/UserService";
-import { AuthenticationView } from "./AuthenticationView";
 import { Buffer } from "buffer";
 import { Dispatch, SetStateAction } from "react";
-import { Presenter } from "./Presenter";
+import { AuthenticationPresenter, AuthenticationView } from "./AuthenticationPresenter";
 
 export interface RegisterView extends AuthenticationView {
   setImageUrl: Dispatch<SetStateAction<string>>;
   setImageFileExtension: Dispatch<SetStateAction<string>>;
 }
 
-export class RegisterPresenter extends Presenter<RegisterView> {
+export class RegisterPresenter extends AuthenticationPresenter<RegisterView> {
   private _userService: UserService;
   private _imageBytes: Uint8Array = new Uint8Array();
 
@@ -26,10 +25,8 @@ export class RegisterPresenter extends Presenter<RegisterView> {
     imageFileExtension: string,
     rememberMe: boolean
   ) {
-    this.view.setIsLoading(true);
-
-    await this.doFailureReportingOperation(async () => {
-      const [user, authToken] = await this._userService.register(
+    await this.doAuthOperation(async () => {
+      return this._userService.register(
         firstName,
         lastName,
         alias,
@@ -37,13 +34,10 @@ export class RegisterPresenter extends Presenter<RegisterView> {
         this._imageBytes,
         imageFileExtension
       );
-
-      this.view.updateUserInfo(user, user, authToken, rememberMe);
-      this.view.navigate(`/feed/${user.alias}`);
-    }, "register user");
-
-    this.view.setIsLoading(false);
-
+    },
+      (alias: string) => {
+        this.view.navigate(`/feed/${alias}`);
+      }, rememberMe, "register user");
   };
 
   public handleImageFile(file: File | undefined) {

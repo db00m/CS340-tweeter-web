@@ -1,8 +1,7 @@
 import { UserService } from "../model.service/UserService";
-import { AuthenticationView } from "./AuthenticationView";
-import { Presenter } from "./Presenter";
+import { AuthenticationPresenter, AuthenticationView } from "./AuthenticationPresenter";
 
-export class LoginPresenter extends Presenter<AuthenticationView> {
+export class LoginPresenter extends AuthenticationPresenter<AuthenticationView> {
   private readonly _userService: UserService
   private readonly _originalUrl: string | undefined;
 
@@ -13,21 +12,15 @@ export class LoginPresenter extends Presenter<AuthenticationView> {
   }
 
   public async doLogin(rememberMe: boolean, alias: string, password: string) {
-    this.view.setIsLoading(true);
-
-    await this.doFailureReportingOperation(async () => {
-
-      const [user, authToken] = await this._userService.login(alias, password);
-
-      this.view.updateUserInfo(user, user, authToken, rememberMe);
-
-      if (!!this._originalUrl) {
-        this.view.navigate(this._originalUrl);
-      } else {
-        this.view.navigate(`/feed/${user.alias}`);
-      }
-    }, "log user in")
-
-    this.view.setIsLoading(false);
+    await this.doAuthOperation(async () => {
+      return this._userService.login(alias, password);
+    },
+      (alias: string) => {
+        if (!!this._originalUrl) {
+          this.view.navigate(this._originalUrl);
+        } else {
+          this.view.navigate(`/feed/${alias}`);
+        }
+      }, rememberMe, "log user in")
   };
 }

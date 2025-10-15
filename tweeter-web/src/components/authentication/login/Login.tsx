@@ -7,7 +7,7 @@ import AuthenticationFields from "../AuthenticationFields";
 import {useMessageActions} from "../../toaster/MessageHooks";
 import {useUserInfoActions} from "../../userInfo/UserInfoHooks";
 import { LoginPresenter } from "../../../presenter/LoginPresenter";
-import { AuthenticationView } from "../../../presenter/AuthenticationView";
+import { AuthenticationView } from "../../../presenter/AuthenticationPresenter";
 
 interface Props {
   originalUrl?: string;
@@ -18,7 +18,6 @@ const Login = (props: Props) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [buttonDisabled, setButtonDisabled] = useState(true);
 
   const navigate = useNavigate();
   const { updateUserInfo } = useUserInfoActions();

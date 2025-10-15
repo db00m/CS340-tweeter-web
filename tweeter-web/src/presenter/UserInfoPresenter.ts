@@ -90,8 +90,9 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
 
     let unfollowingUserToast = "";
 
+    this.view.setIsLoading(true);
+
     await this.doFailureReportingOperation(async () => {
-      this.view.setIsLoading(true);
       unfollowingUserToast = this.view.displayInfoMessage(
         `Unfollowing ${displayedUser!.name}...`,
         0
