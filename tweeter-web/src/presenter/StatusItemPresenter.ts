@@ -3,25 +3,25 @@ import { PAGE_SIZE } from "../components/mainLayout/StatusScroller";
 import { StatusService } from "../model.service/StatusService";
 import { Dispatch, SetStateAction } from "react";
 import { UserService } from "../model.service/UserService";
+import { Presenter, View } from "./Presenter";
 
-export interface StatusItemView {
+export interface StatusItemView extends View {
   addItems: (newItems: Status[]) => void;
   displayErrorMessage: (message: string) => void;
   setHasMoreItems: Dispatch<SetStateAction<boolean>>;
 }
 
-export abstract class StatusItemPresenter {
+export abstract class StatusItemPresenter extends Presenter<StatusItemView> {
   private statusService: StatusService;
   private userService: UserService;
-  private view: StatusItemView;
 
   private _itemDescription: string = '';
   private lastItem: Status | null = null;
 
   protected constructor(view: StatusItemView) {
+    super(view);
     this.statusService = new StatusService();
     this.userService = new UserService();
-    this.view = view;
   }
 
   async getUser (
@@ -32,7 +32,7 @@ export abstract class StatusItemPresenter {
   };
 
   async loadMoreItems (authToken: AuthToken, userAlias: string): Promise<void> {
-    try {
+    await this.doFailureReportingOperation(async () =>  {
       const [newItems, hasMore] = await this.statusService.loadMoreStatuses(
         authToken!,
         userAlias,
@@ -43,15 +43,10 @@ export abstract class StatusItemPresenter {
       this.view.setHasMoreItems(() => hasMore);
       this.lastItem = newItems[newItems.length - 1];
       this.view.addItems(newItems);
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to load ${this._itemDescription} items because of exception: ${error}`
-      );
-    }
+    }, `load ${this._itemDescription}`);
   };
 
   reset(){
-    // this.view.setItems(() => []);  TODO: need to see if this is actually needed
     this.lastItem = null;
     this.view.setHasMoreItems(() => true);
   };

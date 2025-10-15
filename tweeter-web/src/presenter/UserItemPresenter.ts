@@ -2,17 +2,16 @@ import { AuthToken, User } from "tweeter-shared";
 import { FollowService } from "../model.service/FollowService";
 import { UserService } from "../model.service/UserService";
 import { Dispatch, SetStateAction } from "react";
+import { Presenter, View } from "./Presenter";
 
 export const PAGE_SIZE = 10;
 
-export interface UserItemView {
+export interface UserItemView extends View {
   addItems: (newItems: User[]) => void;
-  displayErrorMessage: (message: string) => void;
   setHasMoreItems: Dispatch<SetStateAction<boolean>>;
 }
 
-export abstract class UserItemPresenter {
-  private readonly _view: UserItemView;
+export abstract class UserItemPresenter extends Presenter<UserItemView> {
   private readonly followService: FollowService;
   private readonly userService: UserService;
 
@@ -21,13 +20,9 @@ export abstract class UserItemPresenter {
   private _userType = 'user';
 
   protected constructor(view: UserItemView) {
-    this._view = view;
+    super(view);
     this.followService = new FollowService();
     this.userService = new UserService();
-  }
-
-  protected get view() {
-    return this._view;
   }
 
   protected set userType(userType: string) {
@@ -40,7 +35,7 @@ export abstract class UserItemPresenter {
   }
 
   public async loadMoreItems(authToken: AuthToken, userAlias: string): Promise<void> {
-    try {
+    await this.doFailureReportingOperation(async () => {
       const [newItems, hasMore] = await this.followService.loadMoreUsers(
         authToken,
         userAlias,
@@ -51,11 +46,7 @@ export abstract class UserItemPresenter {
       this.view.setHasMoreItems(() => hasMore);
       this.lastItem = newItems.length > 0 ? newItems[newItems.length - 1] : null;
       this.view.addItems(newItems);
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to load ${this._userType}s because of exception: ${error}`
-      );
-    }
+    }, `load ${this._userType}`)
   };
 
   public async getUser(
