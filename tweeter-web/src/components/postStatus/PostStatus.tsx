@@ -4,7 +4,11 @@ import {useMessageActions} from "../toaster/MessageHooks";
 import {useUserInfo} from "../userInfo/UserInfoHooks";
 import { PostPresenter, PostView } from "../../presenter/PostPresenter";
 
-const PostStatus = () => {
+interface Props {
+  presenter?: PostPresenter;
+}
+
+const PostStatus = (props: Props) => {
   const { displayErrorMessage, displayInfoMessage, deleteMessage } = useMessageActions();
 
   const { currentUser, authToken } = useUserInfo();
@@ -19,7 +23,7 @@ const PostStatus = () => {
     deleteMessage
   }
 
-  const presenter: PostPresenter = useMemo(() => new PostPresenter(listener), [listener]);
+  const presenter: PostPresenter = useMemo(() => props.presenter ?? new PostPresenter(listener), [listener]);
 
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
@@ -55,6 +59,7 @@ const PostStatus = () => {
         <button
           id="postStatusButton"
           className="btn btn-md btn-primary me-1"
+          aria-label="post button"
           type="button"
           disabled={checkButtonStatus()}
           style={{ width: "8em" }}
@@ -73,6 +78,7 @@ const PostStatus = () => {
         <button
           id="clearStatusButton"
           className="btn btn-md btn-secondary"
+          aria-label="clear button"
           type="button"
           disabled={checkButtonStatus()}
           onClick={clearPost}

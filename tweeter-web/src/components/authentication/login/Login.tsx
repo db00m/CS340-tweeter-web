@@ -7,10 +7,11 @@ import AuthenticationFields from "../AuthenticationFields";
 import {useMessageActions} from "../../toaster/MessageHooks";
 import {useUserInfoActions} from "../../userInfo/UserInfoHooks";
 import { LoginPresenter } from "../../../presenter/LoginPresenter";
-import { AuthenticationView } from "../../../presenter/AuthenticationPresenter";
+import { AuthenticationPresenter, AuthenticationView } from "../../../presenter/AuthenticationPresenter";
 
 interface Props {
   originalUrl?: string;
+  presenter?: LoginPresenter;
 }
 
 const Login = (props: Props) => {
@@ -29,7 +30,7 @@ const Login = (props: Props) => {
     navigate,
     displayErrorMessage
   }
-  const presenter = useMemo(() => new LoginPresenter(listener, props.originalUrl), []);
+  const presenter = useMemo(() => props.presenter ?? new LoginPresenter(listener, props.originalUrl), []);
 
   const checkSubmitButtonStatus = (): boolean => {
     return !alias || !password;

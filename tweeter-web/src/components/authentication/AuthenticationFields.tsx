@@ -23,6 +23,7 @@ const AuthenticationFields = ({ onEnter, onPasswordChange, onAliasChange, isBott
                     className="form-control"
                     size={50}
                     id="aliasInput"
+                    aria-label="alias"
                     placeholder="name@example.com"
                     onKeyDown={handleKeyDown}
                     onChange={(event) => onAliasChange(event.target.value)}
@@ -34,6 +35,7 @@ const AuthenticationFields = ({ onEnter, onPasswordChange, onAliasChange, isBott
                     type="password"
                     className={`form-control ${isBottom ? 'bottom' : ''}`}
                     id="passwordInput"
+                    aria-label="password"
                     placeholder="Password"
                     onKeyDown={handleKeyDown}
                     onChange={(event) => onPasswordChange(event.target.value)}

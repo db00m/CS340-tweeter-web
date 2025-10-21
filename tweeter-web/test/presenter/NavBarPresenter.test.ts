@@ -1,9 +1,7 @@
 import { NavBarPresenter, NavBarView } from "../../src/presenter/NavBarPresenter";
 import { anything, instance, mock, spy, verify, when } from "@typestrong/ts-mockito";
-import { AuthToken, User } from "tweeter-shared";
+import { AuthToken } from "tweeter-shared";
 import { UserService } from "../../src/model.service/UserService";
-import appNavbar from "../../src/components/appNavbar/AppNavbar";
-import { isRouteErrorResponse } from "react-router-dom";
 
 describe("NavBarPresenter", () => {
   let mockView: NavBarView;
