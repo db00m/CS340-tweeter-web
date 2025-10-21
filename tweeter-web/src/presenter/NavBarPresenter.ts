@@ -11,11 +11,15 @@ export interface NavBarView extends View {
 }
 
 export class NavBarPresenter extends Presenter<NavBarView> {
-  private userService: UserService;
+  private _userService: UserService;
 
   public constructor(view: NavBarView) {
     super(view);
-    this.userService = new UserService();
+    this._userService = new UserService();
+  }
+
+  public get userService() {
+    return this._userService;
   }
 
   async logOut(authToken: AuthToken) {
