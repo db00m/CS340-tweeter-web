@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import PostStatus from "../../../src/components/postStatus/PostStatus";
 import { useUserInfo } from "../../../src/components/userInfo/UserInfoHooks";
 import { AuthToken, User } from "tweeter-shared";
-import Post from "../../../src/components/statusItem/Post";
 import { PostPresenter } from "../../../src/presenter/PostPresenter";
 import "@testing-library/jest-dom";
 import { userEvent } from "@testing-library/user-event";
