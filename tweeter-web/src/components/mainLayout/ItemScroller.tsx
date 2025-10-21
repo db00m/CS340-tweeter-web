@@ -1,37 +1,37 @@
-import { Status } from "tweeter-shared";
-import { useState, useEffect, useMemo } from "react";
+import { Status, User } from "tweeter-shared";
+import { useState, useEffect, useMemo, ReactNode } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useParams } from "react-router-dom";
-import StatusItem from "../statusItem/StatusItem";
 import {useMessageActions} from "../toaster/MessageHooks";
 import {useUserInfo, useUserInfoActions} from "../userInfo/UserInfoHooks";
-import { StatusItemPresenter } from "../../presenter/StatusItemPresenter";
-import { PagedItemView } from "../../presenter/PagedItemPresenter";
+import { PagedItemPresenter, PagedItemView } from "../../presenter/PagedItemPresenter";
 
-interface Props {
+interface Props<T extends User | Status, U extends PagedItemPresenter<T>> {
   featureUrl: string;
-  presenterFactory: (listener: PagedItemView<Status>) => StatusItemPresenter;
+  presenterFactory: (listener: PagedItemView<T>) => U;
+  featureComponentFactory: (item: T, featurePath: string) => ReactNode;
 }
 
-const StatusScroller = ({ featureUrl, presenterFactory }: Props) => {
+const ItemScroller = <T extends User | Status, U extends PagedItemPresenter<T>,>(
+  { featureUrl, presenterFactory, featureComponentFactory }: Props<T, U>) => {
   const { displayErrorMessage } = useMessageActions();
-  const [items, setItems] = useState<Status[]>([]);
+  const [items, setItems] = useState<T[]>([]);
   const [hasMoreItems, setHasMoreItems] = useState(true);
 
-  const addItems = (newItems: Status[]) =>
+  const { displayedUser, authToken } = useUserInfo();
+  const { setDisplayedUser } = useUserInfoActions();
+  const { displayedUser: displayedUserAliasParam } = useParams();
+
+  const addItems = (newItems: T[]) =>
     setItems((previousItems) => [...previousItems, ...newItems]);
 
-  const listener: PagedItemView<Status> = {
+  const listener: PagedItemView<T> = {
     addItems,
     displayErrorMessage,
     setHasMoreItems
   }
 
-  const presenter: StatusItemPresenter = useMemo(() => presenterFactory(listener), []);
-
-  const { displayedUser, authToken } = useUserInfo();
-  const { setDisplayedUser } = useUserInfoActions();
-  const { displayedUser: displayedUserAliasParam } = useParams();
+  const presenter: PagedItemPresenter<T> = useMemo(() => presenterFactory(listener), []);
 
   // Update the displayed user context variable whenever the displayedUser url parameter changes. This allows browser forward and back buttons to work correctly.
   useEffect(() => {
@@ -65,16 +65,16 @@ const StatusScroller = ({ featureUrl, presenterFactory }: Props) => {
         loader={<h4>Loading...</h4>}
       >
         {items.map((item, index) => (
-            <div
-                key={index}
-                className="row mb-3 mx-0 px-0 border rounded bg-white"
-            >
-                <StatusItem status={item} featurePath={featureUrl}/>
-            </div>
+          <div
+            key={index}
+            className="row mb-3 mx-0 px-0 border rounded bg-white"
+          >
+            {featureComponentFactory(item, featureUrl)}
+          </div>
         ))}
       </InfiniteScroll>
     </div>
   );
 };
 
-export default StatusScroller;
+export default ItemScroller;
