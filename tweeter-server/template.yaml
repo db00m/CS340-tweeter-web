@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: SAM config for Tweeter server
+
+
+#
+# Global Lambda function properties. These apply to every Lambda function.
+#
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    CodeUri: ./dist/
+    Layers:
+      - !Ref tweeterLayer
+    Timeout: 30
+    MemorySize: 128
+
+
+#
+# Reusable blocks of configuration. These are referenced throughout the template to avoid duplication.
+# &identifier is used to define a reusable block, and *identifier is used to reference it.
+#
+Metadata:
+  x-common-policies: &commonPolicies
+    - AWSLambdaBasicExecutionRole
+    - AmazonSESFullAccess
+    - CloudWatchFullAccess
+    - AmazonDynamoDBFullAccess
+    - AmazonS3FullAccess
+    - AmazonSQSFullAccess
+
+  x-common-cors-headers: &commonCorsHeaders
+    method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  x-common-swagger-response-headers: &commonSwaggerResponseHeaders
+    Access-Control-Allow-Origin:
+      type: string
+
+
+#
+# AWS resource definitions
+#
+Resources:
+
+
+  #
+  # Web API
+  #
+
+  tweeterApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: tweeterApi
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          title: "Tweeter API"
+          version: "1.0"
+        x-common-consumes: &commonConsumes
+          - application/json
+        x-common-produces: &commonProduces
+          - application/json
+        x-common-request-templates: &commonRequestTemplates
+          application/json: $input.json('$')
+        x-common-amazon-responses: &commonAmazonResponses
+          default:
+            statusCode: 200
+            responseParameters: *commonCorsHeaders
+          ".*bad-request.*":
+            statusCode: 400
+            responseParameters: *commonCorsHeaders
+            responseTemplates:
+              application/json: '{ "error": "$input.path(''$.errorMessage'')" }'
+          ".*unauthorized.*":
+            statusCode: 401
+            responseParameters: *commonCorsHeaders
+            responseTemplates:
+              application/json: '{ "error": "$input.path(''$.errorMessage'')" }'
+          ".*internal-server-error.*":
+            statusCode: 500
+            responseParameters: *commonCorsHeaders
+            responseTemplates:
+              application/json: '{ "error": "$input.path(''$.errorMessage'')" }'
+        x-common-swagger-responses: &commonSwaggerResponses
+          "200":
+            description: "OK"
+            headers: *commonSwaggerResponseHeaders
+          "400":
+            description: "Bad Request"
+            headers: *commonSwaggerResponseHeaders
+          "401":
+            description: "Unauthorized"
+            headers: *commonSwaggerResponseHeaders
+          "500":
+            description: "Internal Server Error"
+            headers: *commonSwaggerResponseHeaders
+        paths:
+
+          #
+          # Endpoint definitions
+          #
+
+          /followees/{alias}:  ##### TODO: Change "/user/get" to the actual endpoint URL
+            post:
+              consumes: *commonConsumes
+              produces: *commonProduces
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri:
+                  ##### The function name must agree with the "Web API Lambda functions" section below.
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${getFollowees.Arn}/invocations
+                requestTemplates: *commonRequestTemplates
+                responses: *commonAmazonResponses
+              responses: *commonSwaggerResponses
+
+            #
+            # TODO: ADD MORE ENDPOINT DEFINITIONS HERE
+            #
+
+
+  #
+  # SQS Queues  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
+  #
+
+  #   MyQueue:
+  #     Type: AWS::SQS::Queue
+  #     Properties:
+  #       QueueName: MyQueue
+
+
+  #
+  # Lambda Layer (reused by all Lambda functions)
+  #
+  tweeterLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: tweeterLayer
+      Description: dependencies layer for Tweeter server
+      ContentUri: ./layer/
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: DELETE
+
+
+  #
+  # Web API Lambda functions
+  #
+
+  ##### It must match the function name in the "Endpoint definitions" section above.
+  getFollowees:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getFollowees
+      Handler: lambda/GetFolloweesLambda.handler
+      Policies: *commonPolicies
+      Events:
+        PostApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref tweeterApi
+            ##### TODO: Modify the Path property to the actual endpoint URL.
+            ##### It must match the URL in the "Endpoint definitions" section above.
+            Path: /followees/{alias}
+            Method: POST
