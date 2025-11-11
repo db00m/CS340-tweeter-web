@@ -47,6 +47,7 @@ Resources:
   # Web API
   #
 
+
   tweeterApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -105,7 +106,7 @@ Resources:
           # Endpoint definitions
           #
 
-          /followees/{alias}:  ##### TODO: Change "/user/get" to the actual endpoint URL
+          /followees:
             post:
               consumes: *commonConsumes
               produces: *commonProduces
@@ -113,16 +114,23 @@ Resources:
                 type: aws
                 httpMethod: POST
                 uri:
-                  ##### The function name must agree with the "Web API Lambda functions" section below.
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${getFollowees.Arn}/invocations
                 requestTemplates: *commonRequestTemplates
                 responses: *commonAmazonResponses
               responses: *commonSwaggerResponses
 
-            #
-            # TODO: ADD MORE ENDPOINT DEFINITIONS HERE
-            #
-
+          /followers:
+            post:
+              consumes: *commonConsumes
+              produces: *commonProduces
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${getFollowers.Arn}/invocations
+                requestTemplates: *commonRequestTemplates
+                responses: *commonAmazonResponses
+              responses: *commonSwaggerResponses
 
   #
   # SQS Queues  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
@@ -137,6 +145,7 @@ Resources:
   #
   # Lambda Layer (reused by all Lambda functions)
   #
+
   tweeterLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -152,12 +161,11 @@ Resources:
   # Web API Lambda functions
   #
 
-  ##### It must match the function name in the "Endpoint definitions" section above.
   getFollowees:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: getFollowees
-      Handler: lambda/GetFolloweesLambda.handler
+      Handler: lambda/follows/GetFolloweesLambda.handler
       Policies: *commonPolicies
       Events:
         PostApi:
@@ -166,5 +174,40 @@ Resources:
             RestApiId: !Ref tweeterApi
             ##### TODO: Modify the Path property to the actual endpoint URL.
             ##### It must match the URL in the "Endpoint definitions" section above.
-            Path: /followees/{alias}
+            Path: /followees
             Method: POST
+  getFollowers:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: getFollowers
+      Handler: lambda/follows/GetFollowersLambda.handler
+      Policies: *commonPolicies
+      Events:
+        PostApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref tweeterApi
+            ##### TODO: Modify the Path property to the actual endpoint URL.
+            ##### It must match the URL in the "Endpoint definitions" section above.
+            Path: /followers
+            Method: POST
+
+  #
+  # Domain Configuration
+  #
+
+  ApiCustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: tweeter-api.dbl00m11.click
+      RegionalCertificateArn: arn:aws:acm:us-west-2:385027548295:certificate/ca383c7c-c620-4495-b353-b1809bcf02f8
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  ApiBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiCustomDomain
+      RestApiId: !Ref tweeterApi
+      Stage: prod

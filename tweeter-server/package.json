@@ -1,0 +1,20 @@
+{
+  "name": "tweeter-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run compile; mkdir layer; mkdir layer/nodejs; cp -r node_modules layer/nodejs/",
+    "compile": "npm run clean && tsc",
+    "clean": "rm -rf dist layer"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "date-fns": "^3.3.1",
+    "tweeter-shared": "file:../tweeter-shared",
+    "uuid": "^9.0.1"
+  }
+}

@@ -77,7 +77,7 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
       this.view.setIsFollower(true);
       this.view.setFollowerCount(followerCount);
       this.view.setFolloweeCount(followeeCount);
-    }, "follow user");
+    }, "follows user");
 
     this.view.deleteMessage(followingUserToast);
     this.view.setIsLoading(false);

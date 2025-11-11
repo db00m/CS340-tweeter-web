@@ -43,7 +43,7 @@ export class FollowService implements Service {
     authToken: AuthToken,
     userToFollow: UserDto
   ): Promise<[followerCount: number, followeeCount: number]> {
-    // Pause so we can see the follow message. Remove when connected to the server
+    // Pause so we can see the follows message. Remove when connected to the server
     await new Promise((f) => setTimeout(f, 2000));
 
     // TODO: Call the server
