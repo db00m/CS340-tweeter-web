@@ -8,5 +8,7 @@ export { AuthToken } from "./model/domain/AuthToken";
 // uploading to lambda. Instead we have to list each export.
 export { FakeData } from "./util/FakeData";
 export type { UserDto } from "./model/dto/UserDto"
-export type { PagedUserItemRequest } from "./model/net/request/PagedUserItemRequest"
-export type { PagedUserItemResponse } from "./model/net/response/PagedUserItemResponse"
+export type { PagedUserItemRequest } from "./model/net/request/follows/PagedUserItemRequest"
+export type { PagedUserItemResponse } from "./model/net/response/follows/PagedUserItemResponse"
+export type { FollowStatusRequest } from "./model/net/request/follows/FollowStatusRequest"
+export type { FollowStatusResponse } from "./model/net/response/follows/FollowStatusResponse"

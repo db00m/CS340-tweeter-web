@@ -15,8 +15,8 @@ export class FollowService implements Service {
   };
 
   async getIsFollowerStatus(
-    authToken: AuthToken,
-    user: UserDto,
+    authToken: string,
+    userAlias: string,
     selectedUser: UserDto
   ): Promise<boolean> {
     // TODO: Replace with the result of calling server
