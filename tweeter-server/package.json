@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run compile; mkdir layer; mkdir layer/nodejs; cp -r node_modules layer/nodejs/",
+    "package": "rm -rf layer; mkdir layer; mkdir layer/nodejs; cp -r node_modules layer/nodejs/",
+    "build": "npm run compile",
     "compile": "npm run clean && tsc",
-    "clean": "rm -rf dist layer"
+    "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
