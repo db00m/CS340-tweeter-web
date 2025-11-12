@@ -8,7 +8,7 @@ export class StoryPresenter extends StatusItemPresenter {
     super(view);
   }
 
-  protected itemDescription(): string {
+  protected itemDescription(): "story" {
     return "story";
   }
 

@@ -8,7 +8,7 @@ export class FolloweePresenter extends UserItemPresenter {
     super(view);
   }
 
-  protected itemDescription(): string {
+  protected itemDescription(): "followee" {
     return "followee";
   }
 

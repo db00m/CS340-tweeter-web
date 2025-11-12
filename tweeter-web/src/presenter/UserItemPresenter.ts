@@ -15,7 +15,8 @@ export abstract class UserItemPresenter extends PagedItemPresenter<User> {
       authToken,
       userAlias,
       PAGE_SIZE,
-      this.lastItem
+      this.lastItem,
+      this.itemDescription() as ("follower" | "followee")
     );
   }
 }

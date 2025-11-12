@@ -45,5 +45,5 @@ export abstract class PagedItemPresenter<T> extends Presenter<PagedItemView<T>> 
   };
 
   protected abstract getMoreItems(authToken: AuthToken, userAlias: string): Promise<[T[], boolean]>;
-  protected abstract itemDescription(): string;
+  protected abstract itemDescription(): "follower" | "followee" | "feed" | "story";
 }

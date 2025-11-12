@@ -8,7 +8,7 @@ export class FeedPresenter extends StatusItemPresenter {
     super(view);
   }
 
-  protected itemDescription(): string {
+  protected itemDescription(): "feed" {
     return "feed";
   }
 

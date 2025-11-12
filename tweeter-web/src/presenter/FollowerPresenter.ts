@@ -9,7 +9,7 @@ export class FollowerPresenter extends UserItemPresenter {
     super(view);
   }
 
-  protected itemDescription(): string {
+  protected itemDescription(): "follower" {
     return "follower"
   }
 
