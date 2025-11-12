@@ -1,8 +1,9 @@
 import { ClientCommunicator } from "./ClientCommunicator";
 import {
-  CountResponse, FollowActionResponse,
+  AuthToken,
+  CountResponse, CreateAuthRequest, CreateAuthResponse, CreateUserRequest, FollowActionResponse,
   FollowStatusRequest,
-  FollowStatusResponse, PagedStatusItemRequest, PagedStatusItemResponse,
+  FollowStatusResponse, GetUserResponse, PagedStatusItemRequest, PagedStatusItemResponse,
   PagedUserItemRequest,
   PagedUserItemResponse, PostRequest, Status, StatusDto, TweeterRequest, TweeterResponse,
   User,
@@ -100,5 +101,47 @@ export class ServerFacade {
     const items: Status[] = response.items!.map((status: StatusDto): Status => Status.fromDto(status))
 
     return [items, response.hasMore]
+  }
+
+  public async login(request: CreateAuthRequest): Promise<[User, AuthToken]> {
+    const response = await this.clientCommunicator
+      .doPost<CreateAuthRequest, CreateAuthResponse>(request, "/login");
+
+    if(!response.success || response.user === null || response.authToken === null) {
+      throw new Error(`Could not login: ${response.message}`);
+    }
+
+    return [User.fromDto(response.user), AuthToken.fromDto(response.authToken)]
+  }
+
+  public async logout(request: TweeterRequest) {
+    const response = await this.clientCommunicator
+      .doPost<TweeterRequest, TweeterResponse>(request, "/logout");
+
+    if(!response.success) {
+      throw new Error(`Could not logout: ${response.message}`);
+    }
+  }
+
+  public async register(request: CreateUserRequest): Promise<[User, AuthToken]> {
+    const response = await this.clientCommunicator
+      .doPost<CreateUserRequest, CreateAuthResponse>(request, "/register");
+
+    if(!response.success || response.user === null || response.authToken === null) {
+      throw new Error(`Could not register: ${response.message}`);
+    }
+
+    return [User.fromDto(response.user), AuthToken.fromDto(response.authToken)]
+  }
+
+  public async getUser(request: TweeterRequest): Promise<User> {
+    const response = await this.clientCommunicator
+    .doPost<TweeterRequest, GetUserResponse>(request, "/user");
+
+    if(!response.success || response.user === null) {
+      throw new Error(`Could not get user: ${response.message}`);
+    }
+
+    return User.fromDto(response.user)
   }
 }
