@@ -1,6 +1,7 @@
 import { PostSegment, Type } from "./PostSegment";
 import { User } from "./User";
 import { format } from "date-fns";
+import { StatusDto } from "../dto/StatusDto";
 
 export class Status {
   private _post: string;
@@ -273,5 +274,21 @@ export class Status {
 
   public toJson(): string {
     return JSON.stringify(this);
+  }
+
+  public static fromDto(dto: StatusDto): Status {
+    return new Status(
+      dto.post,
+      User.fromDto(dto.user),
+      dto.timestamp
+    )
+  }
+
+  public toDto(): StatusDto {
+    return {
+      post: this.post,
+      user: this.user.toDto(),
+      timestamp: this.timestamp
+    }
   }
 }

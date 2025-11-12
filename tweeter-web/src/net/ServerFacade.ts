@@ -2,9 +2,9 @@ import { ClientCommunicator } from "./ClientCommunicator";
 import {
   CountResponse, FollowActionResponse,
   FollowStatusRequest,
-  FollowStatusResponse,
+  FollowStatusResponse, PagedStatusItemRequest, PagedStatusItemResponse,
   PagedUserItemRequest,
-  PagedUserItemResponse, TweeterRequest,
+  PagedUserItemResponse, PostRequest, Status, StatusDto, TweeterRequest, TweeterResponse,
   User,
   UserDto
 } from "tweeter-shared";
@@ -78,5 +78,27 @@ export class ServerFacade {
     }
 
     return [response.followerCount, response.followeeCount];
+  }
+
+  public async postStatus(request: PostRequest): Promise<void> {
+    const response = await this.clientCommunicator
+      .doPost<PostRequest, TweeterResponse>(request, "/post");
+
+    if(!response.success) {
+      throw new Error(`Could not post: ${response.message}`);
+    }
+  }
+
+  public async getStatuses(statusType: "story" | "feed", request: PagedStatusItemRequest): Promise<[Status[], boolean]> {
+    const response = await this.clientCommunicator
+      .doPost<PagedStatusItemRequest, PagedStatusItemResponse>(request, `/${statusType}`);
+
+    if(!response.success || response.items === undefined) {
+      throw new Error(`Could not get ${statusType}: ${response.message}`);
+    }
+
+    const items: Status[] = response.items!.map((status: StatusDto): Status => Status.fromDto(status))
+
+    return [items, response.hasMore]
   }
 }

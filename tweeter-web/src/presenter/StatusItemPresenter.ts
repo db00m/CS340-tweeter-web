@@ -15,7 +15,8 @@ export abstract class StatusItemPresenter extends PagedItemPresenter<Status> {
       authToken!,
       userAlias,
       PAGE_SIZE,
-      this.lastItem
+      this.lastItem,
+      this.itemDescription() as ("feed" | "story")
     );
   }
 }

@@ -197,6 +197,44 @@ Resources:
                 responses: *commonAmazonResponses
               responses: *commonSwaggerResponses
 
+          /post:
+            post:
+              consumes: *commonConsumes
+              produces: *commonProduces
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateStatus.Arn}/invocations
+                requestTemplates: *commonRequestTemplates
+                responses: *commonAmazonResponses
+              responses: *commonSwaggerResponses
+
+          /feed:
+            post:
+              consumes: *commonConsumes
+              produces: *commonProduces
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFeedStatuses.Arn}/invocations
+                requestTemplates: *commonRequestTemplates
+                responses: *commonAmazonResponses
+              responses: *commonSwaggerResponses
+
+          /story:
+            post:
+              consumes: *commonConsumes
+              produces: *commonProduces
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetStoryStatuses.Arn}/invocations
+                requestTemplates: *commonRequestTemplates
+                responses: *commonAmazonResponses
+              responses: *commonSwaggerResponses
 
 
   #
@@ -324,6 +362,48 @@ Resources:
           Properties:
             RestApiId: !Ref tweeterApi
             Path: /followers/count
+            Method: POST
+
+  CreateStatus:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CreateStatus
+      Handler: lambda/status/CreateStatus.handler
+      Policies: *commonPolicies
+      Events:
+        PostApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref tweeterApi
+            Path: /post
+            Method: POST
+
+  GetFeedStatuses:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetFeedStatuses
+      Handler: lambda/status/GetFeedStatuses.handler
+      Policies: *commonPolicies
+      Events:
+        PostApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref tweeterApi
+            Path: /feed
+            Method: POST
+
+  GetStoryStatuses:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetStoryStatuses
+      Handler: lambda/status/GetStoryStatuses.handler
+      Policies: *commonPolicies
+      Events:
+        PostApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref tweeterApi
+            Path: /story
             Method: POST
   #
   # Domain Configuration
