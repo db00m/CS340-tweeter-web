@@ -9,6 +9,7 @@ export { AuthToken } from "./model/domain/AuthToken";
 export { FakeData } from "./util/FakeData";
 export type { UserDto } from "./model/dto/UserDto"
 export type { TweeterRequest } from "./model/net/request/TweeterRequest"
+export type { TweeterResponse } from "./model/net/response/TweeterResponse"
 export type { PagedUserItemRequest } from "./model/net/request/follows/PagedUserItemRequest"
 export type { PagedUserItemResponse } from "./model/net/response/follows/PagedUserItemResponse"
 export type { FollowStatusRequest } from "./model/net/request/follows/FollowStatusRequest"
