@@ -108,6 +108,7 @@ Resources:
 
           /followees:
             post:
+              description: "Returns a paginated list of users whom follow the current logged in user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -121,6 +122,7 @@ Resources:
 
           /followers:
             post:
+              description: "Returns a paginated list of users whom the current logged in user follows"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -134,6 +136,7 @@ Resources:
 
           /follow_status:
             post:
+              description: "Returns a bool indicated whether the current logged in user follows the selected user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -147,6 +150,7 @@ Resources:
 
           /follow:
             post:
+              description: "Creates a follow record indicating that the current user now follows the selected user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -160,6 +164,7 @@ Resources:
 
           /unfollow:
             post:
+              description: "Deletes the follow record that indicates the current user follows the selected user, thus destroying the relationship."
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -173,6 +178,7 @@ Resources:
 
           /followees/count:
             post:
+              description: "Returns the count of the number of users whom follow the current logged in user."
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -186,6 +192,7 @@ Resources:
 
           /followers/count:
             post:
+              description: "Returns the count of the number of users the current logged in users follow."
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -199,6 +206,7 @@ Resources:
 
           /post:
             post:
+              description: "Creates a status object"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -212,6 +220,7 @@ Resources:
 
           /feed:
             post:
+              description: "Returns a paginated list of statuses in a users feed"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -225,6 +234,7 @@ Resources:
 
           /story:
             post:
+              description: "Returns a paginated list of statues authored by the same user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -238,6 +248,7 @@ Resources:
 
           /login:
             post:
+              description: "Creates a session record and issues an auth token if provided credentials are correct"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -251,6 +262,7 @@ Resources:
 
           /logout:
             post:
+              description: "Deleted session record for user"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -264,6 +276,7 @@ Resources:
 
           /register:
             post:
+              description: "Creates a user record and issues an auth token"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -277,6 +290,7 @@ Resources:
 
           /user:
             post:
+              description: "Gets the user record associated with the provided alias"
               consumes: *commonConsumes
               produces: *commonProduces
               x-amazon-apigateway-integration:
@@ -531,3 +545,109 @@ Resources:
       DomainName: !Ref ApiCustomDomain
       RestApiId: !Ref tweeterApi
       Stage: prod
+
+
+  #
+  #
+  # DB Tables
+  #
+  #
+
+  followsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: follows
+      AttributeDefinitions:
+        - AttributeName: follower_alias
+          AttributeType: S
+        - AttributeName: followee_alias
+          AttributeType: S
+      KeySchema:
+        - AttributeName: follower_alias
+          KeyType: HASH
+        - AttributeName: followee_alias
+          KeyType: RANGE
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      GlobalSecondaryIndexes:
+        - IndexName: follow_index
+          KeySchema:
+            - AttributeName: followee_alias
+              KeyType: HASH
+            - AttributeName: follower_alias
+              KeyType: RANGE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+          Projection:
+            ProjectionType: ALL
+
+  usersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: users
+      AttributeDefinitions:
+        - AttributeName: alias
+          AttributeType: S
+      KeySchema:
+        - AttributeName: alias
+          KeyType: HASH
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  sessionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: sessions
+      AttributeDefinitions:
+        - AttributeName: auth_token
+          AttributeType: S
+      KeySchema:
+        - AttributeName: auth_token
+          KeyType: HASH
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  storiesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: stories
+      AttributeDefinitions:
+        - AttributeName: user_alias
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: user_alias
+          KeyType: HASH
+        - AttributeName: created_at
+          KeyType: RANGE
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  feedTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: feed
+      AttributeDefinitions:
+        - AttributeName: user_alias
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: user_alias
+          KeyType: HASH
+        - AttributeName: created_at
+          KeyType: RANGE
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
