@@ -1,7 +1,16 @@
 import { AuthToken, FakeData, User, UserDto } from "tweeter-shared";
 import { Service } from "./Service";
+import { DAOFactory } from "../../lambda/interfaces/DAOFactory";
+import { FollowsDAO } from "./interfaces/FollowsDAO";
 
 export class FollowService implements Service {
+
+  private followsDAO: FollowsDAO
+
+  constructor(daoFactory: DAOFactory) {
+    this.followsDAO = daoFactory.getFollowsDAO();
+  }
+
   public async loadMoreUsers(
     authToken: string,
     userAlias: string,

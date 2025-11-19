@@ -10,6 +10,6 @@ export const handler = async ({ token, userAlias }: TweeterRequest): Promise<Fol
     success: true,
     message: null,
     followeeCount: followeeCount,
-    followerCount: followerCount,
+    followerCount: followerCount
   }
 }

@@ -34,5 +34,5 @@ describe ("StatusService", () => {
         expect(hasMore).toBe(true);
       });
     });
-  })
+  });
 });

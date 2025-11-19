@@ -10,6 +10,7 @@ export { FakeData } from "./util/FakeData";
 export type { UserDto } from "./model/dto/UserDto"
 export type { StatusDto } from "./model/dto/StatusDto"
 export type { AuthTokenDto } from "./model/dto/AuthTokenDto"
+export type { FollowDto } from "./model/dto/FollowDto"
 export type { TweeterRequest } from "./model/net/request/TweeterRequest"
 export type { TweeterResponse } from "./model/net/response/TweeterResponse"
 export type { PagedUserItemRequest } from "./model/net/request/follows/PagedUserItemRequest"
@@ -28,3 +29,4 @@ export type { CreateAuthRequest } from "./model/net/request/users/CreateAuthRequ
 export type { CreateUserRequest } from "./model/net/request/users/CreateUserRequest"
 export type { CreateAuthResponse } from "./model/net/response/users/CreateAuthResponse"
 export type { GetUserResponse } from "./model/net/response/users/GetUserResponse"
+
