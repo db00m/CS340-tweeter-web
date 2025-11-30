@@ -14,8 +14,14 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/lib-dynamodb": "^3.940.0",
+    "bcrypt": "^6.0.0",
     "date-fns": "^3.3.1",
     "tweeter-shared": "file:../tweeter-shared",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0"
   }
 }

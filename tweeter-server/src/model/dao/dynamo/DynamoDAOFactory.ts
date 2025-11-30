@@ -1,4 +1,4 @@
-import { DAOFactory } from "../../../lambda/interfaces/DAOFactory";
+import { DAOFactory } from "../../service/interfaces/DAOFactory";
 import { FeedDAO } from "../../service/interfaces/FeedDAO";
 import { FollowsDAO } from "../../service/interfaces/FollowsDAO";
 import { SessionsDAO } from "../../service/interfaces/SessionsDAO";

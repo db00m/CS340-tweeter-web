@@ -1,6 +1,6 @@
 import { AuthToken, FakeData, User, UserDto } from "tweeter-shared";
 import { Service } from "./Service";
-import { DAOFactory } from "../../lambda/interfaces/DAOFactory";
+import { DAOFactory } from "./interfaces/DAOFactory";
 import { FollowsDAO } from "./interfaces/FollowsDAO";
 
 export class FollowService implements Service {
