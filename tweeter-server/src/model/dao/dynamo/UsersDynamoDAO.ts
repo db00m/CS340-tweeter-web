@@ -10,13 +10,23 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
+/*
+Schema:
+{
+  firstName: string,
+  lastName: string,
+  alias: string,
+  passwordHash: string,
+  avatarUrl: string
+}
+ */
+
 export class UsersDynamoDAO implements UsersDAO {
   private tableName = "users";
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
   async putUser(user: UserDto, passwordHash: string): Promise<void> {
-    // TODO: Save Avatar in S3 Bucket
     const command = new PutCommand({
       TableName: this.tableName,
       Item: { ...user, passwordHash }
@@ -25,7 +35,19 @@ export class UsersDynamoDAO implements UsersDAO {
     await this.client.send(command);
   }
 
-  getUser(userAlias: string): Promise<StatusDto | null> {
-    return Promise.resolve(null);
+  async getUser(userAlias: string): Promise<UserDto | null> {
+    const command = new GetCommand({
+      TableName: this.tableName,
+      Key: {
+        alias: userAlias
+      }
+    });
+
+    const result = await this.client.send(command);
+    if (!result.Item) {
+      return null;
+    }
+
+    return result.Item as UserDto;
   }
 }

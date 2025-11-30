@@ -3,4 +3,5 @@ export interface UserDto {
   readonly lastName: string
   readonly alias: string
   readonly imageUrl: string
+  readonly passwordHash?: string
 }

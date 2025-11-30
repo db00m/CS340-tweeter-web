@@ -19,8 +19,13 @@ export class UserService implements Service {
     authToken: string,
     alias: string
   ): Promise<User | null> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.findUserByAlias(alias);
+    const user = await this.dao.getUser(alias);
+
+    if (user === null) {
+      throw Error(`User doesn't exist`);
+    }
+
+    return User.fromDto(user);
   };
 
   public async login(
