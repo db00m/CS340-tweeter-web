@@ -5,7 +5,7 @@ import { DynamoDAOFactory } from "../../model/dao/dynamo/DynamoDAOFactory";
 export const handler = async ({ token, userAlias, pageSize, lastItem }: PagedStatusItemRequest): Promise<PagedStatusItemResponse> => {
   const statusService = new StatusService(new DynamoDAOFactory());
 
-  const [items, hasMore] = await statusService.loadMoreStatuses(token, userAlias, pageSize, lastItem)
+  const [items, hasMore] = await statusService.fetchFeedPage(token, userAlias, pageSize, lastItem)
 
   return {
     success: true,

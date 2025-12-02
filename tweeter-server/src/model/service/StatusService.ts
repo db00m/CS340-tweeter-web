@@ -34,15 +34,21 @@ export class StatusService implements Service {
     lastItem: StatusDto | null
   ) {
 
-    await this.authorizationService.authenticate(authToken)
+    await this.authorizationService.authenticate(authToken);
 
-    return await this.storyDAO.getPaginatedStory(userAlias, pageSize, lastItem)
+    return await this.storyDAO.getPaginatedStory(userAlias, pageSize, lastItem);
   }
 
   async fetchFeedPage(
+    authToken: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: StatusDto | null
+  ) {
 
-  ){
+    await this.authorizationService.authenticate(authToken);
 
+    return await this.feedDAO.getPaginatedFeed(userAlias, pageSize, lastItem);
   }
 
   async postStatus(
