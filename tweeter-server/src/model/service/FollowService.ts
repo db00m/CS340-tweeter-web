@@ -2,13 +2,17 @@ import { AuthToken, FakeData, User, UserDto } from "tweeter-shared";
 import { Service } from "./Service";
 import { DAOFactory } from "./interfaces/DAOFactory";
 import { FollowsDAO } from "./interfaces/FollowsDAO";
+import { SessionsDAO } from "./interfaces/SessionsDAO";
+import { AuthenticationService } from "./AuthenticationService";
 
 export class FollowService implements Service {
 
-  private followsDAO: FollowsDAO
+  private followsDAO: FollowsDAO;
+  private authenticationService: AuthenticationService;
 
   constructor(daoFactory: DAOFactory) {
     this.followsDAO = daoFactory.getFollowsDAO();
+    this.authenticationService = new AuthenticationService(daoFactory.getSessionsDAO());
   }
 
   public async loadMoreUsers(
@@ -51,10 +55,13 @@ export class FollowService implements Service {
     authToken: string,
     userAlias: string
   ): Promise<[followerCount: number, followeeCount: number]> {
-    // Pause so we can see the follows message. Remove when connected to the server
 
-    const followerCount = await this.getFollowerCount(authToken, userAlias);
-    const followeeCount = await this.getFolloweeCount(authToken, userAlias);
+    const currentUserAlias = await this.authenticationService.authenticate(authToken);
+
+    await this.followsDAO.createFollow(currentUserAlias, userAlias);
+
+    const followerCount = await this.getFollowerCount(authToken, currentUserAlias);
+    const followeeCount = await this.getFolloweeCount(authToken, currentUserAlias);
 
     return [followerCount, followeeCount];
   };

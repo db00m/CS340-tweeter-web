@@ -6,7 +6,7 @@ export class AuthenticationService {
   constructor(private readonly sessionsDAO: SessionsDAO) {
   }
 
-  async authenticate(token: string): Promise<void> {
+  async authenticate(token: string): Promise<string> {
     const session: SessionDto | null = await this.sessionsDAO.getSession(token)
 
     if (!session) throw Error('Unauthorized');
@@ -14,5 +14,7 @@ export class AuthenticationService {
       await this.sessionsDAO.deleteSession(token);
       throw Error('Unauthorized');
     }
+
+    return session.userAlias
   }
 }
