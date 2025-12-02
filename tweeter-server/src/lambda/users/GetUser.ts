@@ -8,7 +8,15 @@ export const handler = async ({ token, userAlias }: TweeterRequest): Promise<Get
   const userService = new UserService(new DynamoDAOFactory());
   const authenticationService = new AuthenticationService(new SessionsDynamoDAO());
 
-  await authenticationService.authenticate(token); // TODO: Handle authentication errors
+  try {
+    await authenticationService.authenticate(token); // TODO: Handle authentication errors
+  } catch (error) {
+    return {
+      success: false,
+      message: (error as Error).message,
+      user: null
+    }
+  }
 
   const user: User | null = await userService.getUser(userAlias);
 

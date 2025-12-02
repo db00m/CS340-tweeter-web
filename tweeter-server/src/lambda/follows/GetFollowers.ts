@@ -3,12 +3,21 @@ import { FollowService } from "../../model/service/FollowService";
 import { DynamoDAOFactory } from "../../model/dao/dynamo/DynamoDAOFactory";
 
 export const handler = async ({ token, userAlias, pageSize, lastItem }: PagedUserItemRequest): Promise<PagedUserItemResponse> => {
-  const followService = new FollowService(new DynamoDAOFactory());
-  const [items, hasMore] = await followService.loadMoreUsers(token, userAlias, pageSize, lastItem);
-  return {
-    success: true,
-    message: null,
-    items,
-    hasMore
+  try {
+    const followService = new FollowService(new DynamoDAOFactory());
+    const [items, hasMore] = await followService.loadMoreUsers(token, userAlias, pageSize, lastItem);
+    return {
+      success: true,
+      message: null,
+      items,
+      hasMore
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: (error as Error).message,
+      items: [],
+      hasMore: false
+    }
   }
 }
