@@ -1,6 +1,6 @@
 import { FollowsDAO } from "../../service/interfaces/FollowsDAO";
 import { FollowDto, UserDto } from "tweeter-shared";
-import { QueryCommand, PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 // It's okay for this DAO to access more than one table.  The DAO is not an abstraction for the table, but an abstraction
@@ -31,11 +31,32 @@ export class FollowsDynamoDAO implements FollowsDAO {
   }
 
   async getFolloweeCount(followerAlias: string): Promise<number> {
-    return Promise.resolve(0);
+    const command = new QueryCommand({
+      TableName: "follows",
+      KeyConditionExpression: "followerAlias = :a",
+      ExpressionAttributeValues: {
+        ":a": followerAlias
+      },
+      Select: "COUNT"
+    });
+
+    const result = await this.client.send(command);
+    return result.Count ?? 0;
   }
 
   async getFollowerCount(followeeAlias: string): Promise<number> {
-    return Promise.resolve(0);
+    const command = new QueryCommand({
+      TableName: "follows",
+      IndexName: "follow_index",
+      KeyConditionExpression: "followeeAlias = :a",
+      ExpressionAttributeValues: {
+        ":a": followeeAlias
+      },
+      Select: "COUNT"
+    });
+
+    const result = await this.client.send(command);
+    return result.Count ?? 0;
   }
 
   async getPaginatedFollowees(followerAlias: string): Promise<[items: UserDto[], hasMore: boolean]> {

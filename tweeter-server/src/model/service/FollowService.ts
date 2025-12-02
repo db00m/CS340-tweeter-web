@@ -40,7 +40,9 @@ export class FollowService implements Service {
     userAlias: string
   ): Promise<number> {
 
-    return FakeData.instance.getFolloweeCount(userAlias);
+    await this.authenticationService.authenticate(authToken);
+
+    return await this.followsDAO.getFolloweeCount(userAlias);
   };
 
   async getFollowerCount(
@@ -48,7 +50,9 @@ export class FollowService implements Service {
     userAlias: string
   ): Promise<number> {
 
-    return FakeData.instance.getFollowerCount(userAlias);
+    await this.authenticationService.authenticate(authToken);
+
+    return await this.followsDAO.getFollowerCount(userAlias);
   };
 
   async follow(
