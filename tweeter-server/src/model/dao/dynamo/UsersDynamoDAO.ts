@@ -1,12 +1,9 @@
 import { UsersDAO } from "../../service/interfaces/UsersDAO";
 import { StatusDto, UserDto } from "tweeter-shared";
 import {
-  BatchWriteCommand,
-  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
-  PutCommand, QueryCommand,
-  UpdateCommand,
+  PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 

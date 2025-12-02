@@ -1,7 +1,7 @@
-import { AuthTokenDto, UserDto } from "tweeter-shared";
+import { AuthTokenDto, SessionDto, UserDto } from "tweeter-shared";
 
 export interface SessionsDAO {
-  getAuthorizedUser(token: string): Promise<UserDto | null>;
+  getSession(token: string): Promise<SessionDto | null>;
   createSession(userAlias: string, authToken: AuthTokenDto): Promise<void>;
   deleteSession(token: string): Promise<void>;
 }

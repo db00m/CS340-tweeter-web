@@ -1,49 +1,57 @@
 import { AuthToken, AuthTokenDto, FakeData, User, UserDto } from "tweeter-shared";
 import { Buffer } from "buffer";
 import { Service } from "./Service";
-import { PasswordUtil } from "./PasswordUtil";
+import { PasswordService } from "./PasswordService";
 import { UsersDAO } from "./interfaces/UsersDAO";
 import { DAOFactory } from "./interfaces/DAOFactory";
+import { SessionsDAO } from "./interfaces/SessionsDAO";
+import { AuthenticationService } from "./AuthenticationService";
 
 export class UserService implements Service {
 
-  private passwordUtil = new PasswordUtil();
+  private passwordService = new PasswordService();
 
   private dao: UsersDAO;
+  private sessionsDAO: SessionsDAO;
 
   constructor(daoFactory: DAOFactory) {
     this.dao = daoFactory.getUsersDAO();
+    this.sessionsDAO = daoFactory.getSessionsDAO();
   }
 
   public async getUser(
-    authToken: string,
     alias: string
-  ): Promise<User | null> {
-    const user = await this.dao.getUser(alias);
+  ): Promise<User> {
+    const userDto: UserDto | null = await this.getUserDto(alias);
 
-    if (user === null) {
-      throw Error(`User doesn't exist`);
+    if (!userDto) {
+      throw Error('User not found');
     }
 
-    return User.fromDto(user);
+    return User.fromDto(userDto);
   };
+
+  private async getUserDto(
+    alias: string
+  ): Promise<UserDto | null> {
+    return await this.dao.getUser(alias);
+  }
 
   public async login(
     alias: string,
     password: string
   ): Promise<[UserDto, AuthTokenDto]> {
-    // TODO: Get User
-    // TODO: Verify Password
-    const user = FakeData.instance.firstUser;
+    const userDto = await this.getUserDto(alias);
 
-    if (user === null) {
+    if (!userDto || (userDto.passwordHash && !await this.passwordService.checkPassword(password, userDto.passwordHash))) {
       throw new Error("Invalid alias or password");
     }
 
-    return [user.toDto(), FakeData.instance.authToken.toDto()];
+    return [userDto, await this.createSession(alias)];
   };
 
   public async logout(authToken: string): Promise<void> {
+    await this.sessionsDAO.deleteSession(authToken);
   };
 
   public async register(
@@ -51,22 +59,29 @@ export class UserService implements Service {
     lastName: string,
     alias: string,
     password: string,
-    userImageBytes: string,
+    userImageBytes: string, // TODO: Shouldn't need this on the server
     imageFileExtension: string
-  ): Promise<[User, AuthToken]> {
+  ): Promise<[UserDto, AuthTokenDto]> {
 
-    const user: UserDto = {
+    const userDto: UserDto = {
       firstName,
       lastName,
       alias,
       imageUrl: "" // TODO: should come from S3 storage
     };
 
-    const passwordHash = await this.passwordUtil.hashPassword(password);
+    const passwordHash = await this.passwordService.hashPassword(password);
 
-    await this.dao.putUser(user, passwordHash);
-    // TODO: Login User
+    await this.dao.putUser(userDto, passwordHash);
 
-    return [User.fromDto(user), FakeData.instance.authToken]; // TODO: Should send real Auth token.
+    return [userDto, await this.createSession(alias)];
   };
+
+  private async createSession(alias: string): Promise<AuthTokenDto> {
+    const authToken = AuthToken.Generate().toDto();
+
+    await this.sessionsDAO.createSession(alias, authToken);
+
+    return authToken;
+  }
 }

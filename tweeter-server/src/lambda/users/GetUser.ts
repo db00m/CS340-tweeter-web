@@ -1,11 +1,16 @@
 import { GetUserResponse, TweeterRequest, TweeterResponse, User } from "tweeter-shared";
 import { UserService } from "../../model/service/UserService";
 import { DynamoDAOFactory } from "../../model/dao/dynamo/DynamoDAOFactory";
+import { AuthenticationService } from "../../model/service/AuthenticationService";
+import { SessionsDynamoDAO } from "../../model/dao/dynamo/SessionsDynamoDAO";
 
 export const handler = async ({ token, userAlias }: TweeterRequest): Promise<GetUserResponse> => {
   const userService = new UserService(new DynamoDAOFactory());
+  const authenticationService = new AuthenticationService(new SessionsDynamoDAO());
 
-  const user: User | null = await userService.getUser(token, userAlias);
+  await authenticationService.authenticate(token); // TODO: Handle authentication errors
+
+  const user: User | null = await userService.getUser(userAlias);
 
   if (!user) {
     return {

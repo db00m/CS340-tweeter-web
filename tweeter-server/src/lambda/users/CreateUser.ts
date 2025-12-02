@@ -1,6 +1,5 @@
 import { CreateAuthResponse, CreateUserRequest } from "tweeter-shared";
 import { UserService } from "../../model/service/UserService";
-import { User } from "tweeter-shared";
 import { DynamoDAOFactory } from "../../model/dao/dynamo/DynamoDAOFactory";
 
 export const handler = async (
@@ -13,7 +12,7 @@ export const handler = async (
     return {
       success: true,
       message: null,
-      user: user.toDto(),
+      user: user,
       authToken
     }
   } catch (error) {

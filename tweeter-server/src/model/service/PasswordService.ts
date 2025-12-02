@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 
-export class PasswordUtil {
+export class PasswordService {
 
   private saltRounds = 12
 

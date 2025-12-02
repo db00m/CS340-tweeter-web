@@ -1,17 +1,55 @@
 import { SessionsDAO } from "../../service/interfaces/SessionsDAO";
-import { AuthTokenDto, UserDto } from "tweeter-shared";
+import { AuthTokenDto, SessionDto } from "tweeter-shared";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  DeleteCommand
+} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 export class SessionsDynamoDAO implements SessionsDAO {
-  createSession(userAlias: string, authToken: AuthTokenDto): Promise<void> {
-    return Promise.resolve(undefined);
+  private tableName = "sessions";
+
+  private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
+
+  async createSession(userAlias: string, authToken: AuthTokenDto): Promise<void> {
+    const command = new PutCommand({
+      TableName: this.tableName,
+      Item: {
+        userAlias,
+        authToken: authToken.token,
+        timestamp: authToken.timestamp,
+      }
+    });
+
+    await this.client.send(command);
   }
 
-  deleteSession(token: string): Promise<void> {
-    return Promise.resolve(undefined);
+  async deleteSession(authToken: string): Promise<void> {
+    const command = new DeleteCommand({
+      TableName: this.tableName,
+      Key: {
+        authToken
+      }
+    });
+
+    await this.client.send(command);
   }
 
-  getAuthorizedUser(token: string): Promise<UserDto | null> {
-    return Promise.resolve(null);
+  async getSession(token: string): Promise<SessionDto | null> {
+    const command = new GetCommand({
+      TableName: this.tableName,
+      Key: {
+        authToken: token,
+      }
+    });
+
+    const result = await this.client.send(command);
+
+    if (!result.Item) return null;
+
+    return result.Item as SessionDto;
   }
 
 }

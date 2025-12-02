@@ -57,6 +57,10 @@ Resources:
         AllowMethods: "'GET,POST,PUT,DELETE'"
         AllowHeaders: "'*'"
         AllowOrigin: "'*'"
+      Domain:
+        DomainName: tweeter-api.dbl00m11.click
+        CertificateArn: arn:aws:acm:us-west-2:385027548295:certificate/ca383c7c-c620-4495-b353-b1809bcf02f8
+        EndpointConfiguration: REGIONAL
       DefinitionBody:
         swagger: "2.0"
         info:
@@ -529,24 +533,6 @@ Resources:
   #
   # Domain Configuration
   #
-
-  ApiCustomDomain:
-    Type: AWS::ApiGateway::DomainName
-    Properties:
-      DomainName: tweeter-api.dbl00m11.click
-      RegionalCertificateArn: arn:aws:acm:us-west-2:385027548295:certificate/ca383c7c-c620-4495-b353-b1809bcf02f8
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-
-  ApiBasePathMapping:
-    Type: AWS::ApiGateway::BasePathMapping
-    Properties:
-      DomainName: !Ref ApiCustomDomain
-      RestApiId: !Ref tweeterApi
-      Stage: prod
-
-
   #
   #
   # DB Tables
@@ -558,14 +544,14 @@ Resources:
     Properties:
       TableName: follows
       AttributeDefinitions:
-        - AttributeName: follower_alias
+        - AttributeName: followerAlias
           AttributeType: S
-        - AttributeName: followee_alias
+        - AttributeName: followeeAlias
           AttributeType: S
       KeySchema:
-        - AttributeName: follower_alias
+        - AttributeName: followerAlias
           KeyType: HASH
-        - AttributeName: followee_alias
+        - AttributeName: followeeAlias
           KeyType: RANGE
       BillingMode: PROVISIONED
       ProvisionedThroughput:
@@ -574,9 +560,9 @@ Resources:
       GlobalSecondaryIndexes:
         - IndexName: follow_index
           KeySchema:
-            - AttributeName: followee_alias
+            - AttributeName: followeeAlias
               KeyType: HASH
-            - AttributeName: follower_alias
+            - AttributeName: followerAlias
               KeyType: RANGE
           ProvisionedThroughput:
             ReadCapacityUnits: 1
@@ -604,10 +590,10 @@ Resources:
     Properties:
       TableName: sessions
       AttributeDefinitions:
-        - AttributeName: auth_token
+        - AttributeName: authToken
           AttributeType: S
       KeySchema:
-        - AttributeName: auth_token
+        - AttributeName: authToken
           KeyType: HASH
       BillingMode: PROVISIONED
       ProvisionedThroughput:
@@ -619,14 +605,14 @@ Resources:
     Properties:
       TableName: stories
       AttributeDefinitions:
-        - AttributeName: user_alias
+        - AttributeName: userAlias
           AttributeType: S
-        - AttributeName: created_at
+        - AttributeName: createdAt
           AttributeType: N
       KeySchema:
-        - AttributeName: user_alias
+        - AttributeName: userAlias
           KeyType: HASH
-        - AttributeName: created_at
+        - AttributeName: createdAt
           KeyType: RANGE
       BillingMode: PROVISIONED
       ProvisionedThroughput:
@@ -638,14 +624,14 @@ Resources:
     Properties:
       TableName: feed
       AttributeDefinitions:
-        - AttributeName: user_alias
+        - AttributeName: userAlias
           AttributeType: S
-        - AttributeName: created_at
+        - AttributeName: createdAt
           AttributeType: N
       KeySchema:
-        - AttributeName: user_alias
+        - AttributeName: userAlias
           KeyType: HASH
-        - AttributeName: created_at
+        - AttributeName: createdAt
           KeyType: RANGE
       BillingMode: PROVISIONED
       ProvisionedThroughput:
