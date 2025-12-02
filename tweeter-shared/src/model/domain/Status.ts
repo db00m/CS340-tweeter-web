@@ -280,7 +280,7 @@ export class Status {
     return new Status(
       dto.post,
       User.fromDto(dto.user),
-      dto.timestamp
+      dto.createdAt
     )
   }
 
@@ -288,7 +288,7 @@ export class Status {
     return {
       post: this.post,
       user: this.user.toDto(),
-      timestamp: this.timestamp
+      createdAt: this.timestamp
     }
   }
 }

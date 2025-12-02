@@ -26,6 +26,8 @@ export abstract class AuthenticationPresenter<T extends AuthenticationView> exte
 
       const [user, authToken] = await authOperation();
 
+      console.log(authToken);
+
       this.view.updateUserInfo(user, user, authToken, rememberMe);
 
       navOperation(user.alias);

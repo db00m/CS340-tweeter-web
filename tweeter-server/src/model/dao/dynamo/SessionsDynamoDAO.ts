@@ -23,6 +23,8 @@ export class SessionsDynamoDAO implements SessionsDAO {
       }
     });
 
+    console.log(`Creating Session: ${authToken}`)
+
     await this.client.send(command);
   }
 

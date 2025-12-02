@@ -10,7 +10,7 @@ export class AuthenticationService {
     const session: SessionDto | null = await this.sessionsDAO.getSession(token)
 
     if (!session) throw Error('Unauthorized');
-    if (session.timestamp < Date.now()) {
+    if (session.timestamp > Date.now()) {
       await this.sessionsDAO.deleteSession(token);
       throw Error('Unauthorized');
     }
