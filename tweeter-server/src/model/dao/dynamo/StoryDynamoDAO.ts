@@ -22,8 +22,9 @@ export class StoryDynamoDAO implements StoryDAO {
   async getPaginatedStory(userAlias: string, pageSize: number, lastItem: StatusDto | null): Promise<[StatusDto[], boolean]> {
     const command = new QueryCommand({
       TableName: "stories",
+      KeyConditionExpression: "userAlias = :v",
       ExpressionAttributeValues: {
-        userAlias
+        ":v": userAlias,
       },
       Limit: pageSize,
       ExclusiveStartKey: lastItem ? {
