@@ -1,6 +1,6 @@
 import { FollowsDAO } from "../../service/interfaces/FollowsDAO";
-import { FollowDto, UserDto } from "tweeter-shared";
-import { DynamoDBDocumentClient, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { FollowDto, StatusDto, UserDto } from "tweeter-shared";
+import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 // It's okay for this DAO to access more than one table.  The DAO is not an abstraction for the table, but an abstraction
@@ -23,11 +23,33 @@ export class FollowsDynamoDAO implements FollowsDAO {
   }
 
   async deleteFollow(followerAlias: string, followeeAlias: string): Promise<void> {
-    return Promise.resolve(undefined);
+    const command = new DeleteCommand({
+      TableName: "follows",
+      Key: {
+        followerAlias,
+        followeeAlias
+      }
+    });
+
+    await this.client.send(command);
   }
 
   async getFollow(followerAlias: string, followeeAlias: string): Promise<FollowDto | null> {
-    return Promise.resolve(null);
+    const command = new GetCommand({
+      TableName: "follows",
+      Key: {
+        followerAlias,
+        followeeAlias
+      }
+    });
+
+    const result = await this.client.send(command);
+
+    if (!result.Item) {
+      return null;
+    }
+
+    return result.Item as FollowDto;
   }
 
   async getFolloweeCount(followerAlias: string): Promise<number> {
@@ -59,13 +81,59 @@ export class FollowsDynamoDAO implements FollowsDAO {
     return result.Count ?? 0;
   }
 
-  async getPaginatedFollowees(followerAlias: string): Promise<[items: UserDto[], hasMore: boolean]> {
-    return Promise.resolve([[], false]);
+  async getPaginatedFollowees(followerAlias: string, pageSize: number, lastAlias: string | undefined): Promise<[aliases: string[], hasMore: boolean]> {
+    const command = new QueryCommand({
+      TableName: "follows",
+      KeyConditionExpression: "followerAlias = :v",
+      ExpressionAttributeValues: {
+        ":v": followerAlias
+      },
+      ExclusiveStartKey: lastAlias ? {
+        followerAlias,
+        followeeAlias: lastAlias
+      } : undefined,
+    });
+
+    const result = await this.client.send(command);
+    const hasMore = result.LastEvaluatedKey !== undefined;
+
+    if (result.Items === undefined) {
+      return [[], false];
+    }
+
+    const aliases: string[] = result.Items.map((item) => {
+      return item["followeeAlias"];
+    });
+
+    return [aliases, hasMore];
   }
 
-  async getPaginatedFollowers(followeeAlias: string): Promise<[items: UserDto[], hasMore: boolean]> {
+  async getPaginatedFollowers(followeeAlias: string, pageSize: number, lastAlias: string | undefined): Promise<[aliases: string[], hasMore: boolean]> {
     // Need to make 2 queries, one to get followee aliases and one to get user data from aliases
-    return Promise.resolve([[], false]);
-  }
+    const command = new QueryCommand({
+      TableName: "follows",
+      IndexName: "follow_index",
+      KeyConditionExpression: "followeeAlias = :v",
+      ExpressionAttributeValues: {
+        ":v": followeeAlias
+      },
+      ExclusiveStartKey: lastAlias ? {
+        followeeAlias,
+        followerAlias: lastAlias
+      } : undefined,
+    });
 
+    const result = await this.client.send(command);
+    const hasMore = result.LastEvaluatedKey !== undefined;
+
+    if (result.Items === undefined) {
+      return [[], false];
+    }
+
+    const aliases: string[] = result.Items.map((item) => {
+      return item["followerAlias"];
+    });
+
+    return [aliases, hasMore];
+  }
 }

@@ -4,14 +4,17 @@ import { DAOFactory } from "./interfaces/DAOFactory";
 import { FollowsDAO } from "./interfaces/FollowsDAO";
 import { SessionsDAO } from "./interfaces/SessionsDAO";
 import { AuthenticationService } from "./AuthenticationService";
+import { UsersDAO } from "./interfaces/UsersDAO";
 
 export class FollowService implements Service {
 
   private followsDAO: FollowsDAO;
+  private usersDAO: UsersDAO;
   private authenticationService: AuthenticationService;
 
   constructor(daoFactory: DAOFactory) {
     this.followsDAO = daoFactory.getFollowsDAO();
+    this.usersDAO = daoFactory.getUsersDAO();
     this.authenticationService = new AuthenticationService(daoFactory.getSessionsDAO());
   }
 
@@ -26,13 +29,52 @@ export class FollowService implements Service {
     return [items.map((item: User) => item.toDto()), hasMore];
   };
 
+  public async fetchFollowersPage(
+    authToken: string,
+    userAlias: string,
+    pageSize: number,
+    lastUser: UserDto | null
+  ): Promise<[UserDto[], boolean]>  {
+    await this.authenticationService.authenticate(authToken)
+
+    const [aliases, hasMore] = await this.followsDAO.getPaginatedFollowers(userAlias, pageSize, lastUser?.alias);
+
+    if (aliases.length === 0) {
+      return [[], false];
+    }
+
+    const users = await this.usersDAO.bulkGetUsers(aliases);
+    return [users, hasMore];
+  }
+
+  public async fetchFolloweesPage(
+    authToken: string,
+    userAlias: string,
+    pageSize: number,
+    lastUser: UserDto | null
+  ): Promise<[UserDto[], boolean]> {
+    await this.authenticationService.authenticate(authToken)
+
+    const [aliases, hasMore] = await this.followsDAO.getPaginatedFollowees(userAlias, pageSize, lastUser?.alias);
+
+    if (aliases.length === 0) {
+      return [[], false];
+    }
+
+    const users = await this.usersDAO.bulkGetUsers(aliases);
+    return [users, hasMore];
+  }
+
   async getIsFollowerStatus(
     authToken: string,
     userAlias: string,
     selectedUser: UserDto
   ): Promise<boolean> {
 
-    return FakeData.instance.isFollower();
+    await this.authenticationService.authenticate(authToken);
+    const follow = await this.followsDAO.getFollow(userAlias, selectedUser.alias);
+
+    return !!follow;
   };
 
   async getFolloweeCount(
@@ -75,7 +117,9 @@ export class FollowService implements Service {
     userAlias: string
   ): Promise<[followerCount: number, followeeCount: number]> {
     // Pause so we can see the unfollow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
+    const currentUserAlias = await this.authenticationService.authenticate(authToken);
+
+    await this.followsDAO.deleteFollow(currentUserAlias, userAlias);
 
     const followerCount = await this.getFollowerCount(authToken, userAlias);
     const followeeCount = await this.getFolloweeCount(authToken, userAlias);

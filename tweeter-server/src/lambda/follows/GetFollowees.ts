@@ -6,7 +6,7 @@ export const handler = async ({ token, userAlias, pageSize, lastItem }: PagedUse
   const followService = new FollowService(new DynamoDAOFactory());
 
   try {
-    const [items, hasMore] = await followService.loadMoreUsers(token, userAlias, pageSize, lastItem);
+    const [items, hasMore] = await followService.fetchFolloweesPage(token, userAlias, pageSize, lastItem);
     return {
       success: true,
       message: null,

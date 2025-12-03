@@ -1,6 +1,7 @@
 import { UsersDAO } from "../../service/interfaces/UsersDAO";
 import { StatusDto, UserDto } from "tweeter-shared";
 import {
+  BatchGetCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -46,5 +47,19 @@ export class UsersDynamoDAO implements UsersDAO {
     }
 
     return result.Item as UserDto;
+  }
+
+  async bulkGetUsers(userAliases: string[]): Promise<UserDto[]> {
+    const keys = userAliases.map(alias => ({ alias }));
+    const command = new BatchGetCommand({
+      RequestItems: {
+        [this.tableName]: {
+          Keys: keys
+        }
+      }
+    });
+
+    const result = await this.client.send(command);
+    return result.Responses?.[this.tableName].map((item) => item as UserDto) ?? [];
   }
 }
