@@ -1,4 +1,4 @@
-import { AuthToken, FakeData, FollowStatusRequest, PagedUserItemRequest, User } from "tweeter-shared";
+import { AuthToken, FollowStatusRequest, PagedUserItemRequest, User } from "tweeter-shared";
 import { Service } from "./Service";
 import { ServerFacade } from "../net/ServerFacade";
 

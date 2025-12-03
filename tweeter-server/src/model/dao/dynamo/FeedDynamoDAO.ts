@@ -1,7 +1,9 @@
 import { FeedDAO } from "../../service/interfaces/FeedDAO";
 import { StatusDto } from "tweeter-shared";
-import { QueryCommand, PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { QueryCommand, PutCommand, DynamoDBDocumentClient, BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+const BATCH_SIZE = 25;
 
 export class FeedDynamoDAO implements FeedDAO {
 
@@ -17,6 +19,35 @@ export class FeedDynamoDAO implements FeedDAO {
     });
 
     await this.client.send(command);
+  }
+
+  async batchAddToFeed(feedOwnerAliases: string[], status: StatusDto): Promise<void> {
+    const putRequests = feedOwnerAliases.map((userAlias) => {
+      return {
+        PutRequest: {
+          Item: {
+            status,
+            createdAt: status.createdAt,
+            userAlias
+          }
+        }
+      }
+    });
+
+    const batches = []
+    for (let i = 0; i < putRequests.length; i+=BATCH_SIZE) {
+      batches.push(putRequests.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let i = 0; i < batches.length; i++) {
+      const command = new BatchWriteCommand({
+        RequestItems: {
+          "feed": batches[i]
+        }
+      });
+
+      await this.client.send(command);
+    }
   }
 
   async getPaginatedFeed(userAlias: string, pageSize: number, lastItem: StatusDto | null): Promise<[StatusDto[], boolean]> {
@@ -42,7 +73,7 @@ export class FeedDynamoDAO implements FeedDAO {
     }
 
     const items: StatusDto[] = result.Items.map((item) => {
-      return item as StatusDto;
+      return item["status"] as StatusDto;
     });
 
     return [items, hasMore];

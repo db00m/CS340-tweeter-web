@@ -1,5 +1,4 @@
-import { AuthToken, AuthTokenDto, FakeData, User, UserDto } from "tweeter-shared";
-import { Buffer } from "buffer";
+import { AuthToken, AuthTokenDto, User, UserDto } from "tweeter-shared";
 import { Service } from "./Service";
 import { PasswordService } from "./PasswordService";
 import { UsersDAO } from "./interfaces/UsersDAO";

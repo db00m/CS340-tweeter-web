@@ -9,7 +9,23 @@ export const handler = async ({ token, userAlias }: TweeterRequest): Promise<Get
   const authenticationService = new AuthenticationService(new SessionsDynamoDAO());
 
   try {
-    await authenticationService.authenticate(token); // TODO: Handle authentication errors
+    await authenticationService.authenticate(token);
+
+    const user: User | null = await userService.getUser(userAlias);
+
+    if (!user) {
+      return {
+        success: false,
+        message: "No user found",
+        user: null
+      }
+    }
+
+    return {
+      success: true,
+      message: null,
+      user: user.toDto()
+    }
   } catch (error) {
     return {
       success: false,
@@ -18,19 +34,5 @@ export const handler = async ({ token, userAlias }: TweeterRequest): Promise<Get
     }
   }
 
-  const user: User | null = await userService.getUser(userAlias);
 
-  if (!user) {
-    return {
-      success: false,
-      message: "No user found",
-      user: null
-    }
-  }
-
-  return {
-    success: true,
-    message: null,
-    user: user.toDto()
-  }
 }

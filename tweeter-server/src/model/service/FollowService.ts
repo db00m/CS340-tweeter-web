@@ -1,8 +1,7 @@
-import { AuthToken, FakeData, User, UserDto } from "tweeter-shared";
+import { UserDto } from "tweeter-shared";
 import { Service } from "./Service";
 import { DAOFactory } from "./interfaces/DAOFactory";
 import { FollowsDAO } from "./interfaces/FollowsDAO";
-import { SessionsDAO } from "./interfaces/SessionsDAO";
 import { AuthenticationService } from "./AuthenticationService";
 import { UsersDAO } from "./interfaces/UsersDAO";
 
@@ -17,17 +16,6 @@ export class FollowService implements Service {
     this.usersDAO = daoFactory.getUsersDAO();
     this.authenticationService = new AuthenticationService(daoFactory.getSessionsDAO());
   }
-
-  public async loadMoreUsers(
-    authToken: string,
-    userAlias: string,
-    pageSize: number,
-    lastUser: UserDto | null
-  ): Promise<[UserDto[], boolean]> {
-
-    const [items, hasMore] =  FakeData.instance.getPageOfUsers(lastUser ? User.fromDto(lastUser) : null, pageSize, userAlias);
-    return [items.map((item: User) => item.toDto()), hasMore];
-  };
 
   public async fetchFollowersPage(
     authToken: string,
