@@ -3,9 +3,10 @@ import { UserService } from "../../model/service/UserService";
 import { DynamoDAOFactory } from "../../model/dao/dynamo/DynamoDAOFactory";
 import { AuthenticationService } from "../../model/service/AuthenticationService";
 import { SessionsDynamoDAO } from "../../model/dao/dynamo/SessionsDynamoDAO";
+import { S3AvatarDAO } from "../../model/dao/s3/S3AvatarDAO";
 
 export const handler = async ({ token, userAlias }: TweeterRequest): Promise<GetUserResponse> => {
-  const userService = new UserService(new DynamoDAOFactory());
+  const userService = new UserService(new DynamoDAOFactory(), new S3AvatarDAO());
   const authenticationService = new AuthenticationService(new SessionsDynamoDAO());
 
   try {

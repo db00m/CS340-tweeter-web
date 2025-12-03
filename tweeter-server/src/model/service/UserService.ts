@@ -5,6 +5,7 @@ import { UsersDAO } from "./interfaces/UsersDAO";
 import { DAOFactory } from "./interfaces/DAOFactory";
 import { SessionsDAO } from "./interfaces/SessionsDAO";
 import { AuthenticationService } from "./AuthenticationService";
+import { AvatarDAO } from "./interfaces/AvatarDAO";
 
 export class UserService implements Service {
 
@@ -12,10 +13,12 @@ export class UserService implements Service {
 
   private dao: UsersDAO;
   private sessionsDAO: SessionsDAO;
+  private avatarDAO: AvatarDAO;
 
-  constructor(daoFactory: DAOFactory) {
+  constructor(daoFactory: DAOFactory, avatarDAO: AvatarDAO) {
     this.dao = daoFactory.getUsersDAO();
     this.sessionsDAO = daoFactory.getSessionsDAO();
+    this.avatarDAO = avatarDAO;
   }
 
   public async getUser(
@@ -58,15 +61,21 @@ export class UserService implements Service {
     lastName: string,
     alias: string,
     password: string,
-    userImageBytes: string, // TODO: Shouldn't need this on the server
+    userImageBytes: string,
     imageFileExtension: string
   ): Promise<[UserDto, AuthTokenDto]> {
+
+    let avatarUrl = ""
+
+    if (userImageBytes.length > 0) {
+      avatarUrl = await this.avatarDAO.uploadAvatar(userImageBytes, imageFileExtension, `${alias.slice(1)}.${imageFileExtension}`);
+    }
 
     const userDto: UserDto = {
       firstName,
       lastName,
       alias,
-      imageUrl: "" // TODO: should come from S3 storage
+      imageUrl: avatarUrl,
     };
 
     const passwordHash = await this.passwordService.hashPassword(password);
