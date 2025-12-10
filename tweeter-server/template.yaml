@@ -593,8 +593,8 @@ Resources:
           KeyType: RANGE
       BillingMode: PROVISIONED
       ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+        ReadCapacityUnits: 100
+        WriteCapacityUnits: 100
       GlobalSecondaryIndexes:
         - IndexName: follow_index
           KeySchema:
@@ -603,8 +603,8 @@ Resources:
             - AttributeName: followerAlias
               KeyType: RANGE
           ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
+            ReadCapacityUnits: 100
+            WriteCapacityUnits: 100
           Projection:
             ProjectionType: ALL
 

@@ -1,4 +1,4 @@
-import { FollowDto, UserDto } from "tweeter-shared";
+import { FollowDto } from "tweeter-shared";
 
 export interface FollowsDAO {
   createFollow(followerAlias: string, followeeAlias: string): Promise<void>;
@@ -8,4 +8,5 @@ export interface FollowsDAO {
   getFollowerCount(followeeAlias: string): Promise<number>;
   getFolloweeCount(followerAlias: string): Promise<number>;
   getFollow(followerAlias: string, followeeAlias: string): Promise<FollowDto | null>;
+  bulkCreateFollowsForFollowee(followeeAlias: string, followerAliases: string[]): Promise<void>;
 }

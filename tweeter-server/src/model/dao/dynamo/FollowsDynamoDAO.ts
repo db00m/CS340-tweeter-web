@@ -1,7 +1,9 @@
 import { FollowsDAO } from "../../service/interfaces/FollowsDAO";
-import { FollowDto, StatusDto, UserDto } from "tweeter-shared";
-import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { FollowDto } from "tweeter-shared";
+import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+const BATCH_SIZE = 25;
 
 export class FollowsDynamoDAO implements FollowsDAO {
 
@@ -18,6 +20,8 @@ export class FollowsDynamoDAO implements FollowsDAO {
 
     await this.client.send(command);
   }
+
+
 
   async deleteFollow(followerAlias: string, followeeAlias: string): Promise<void> {
     const command = new DeleteCommand({
@@ -89,6 +93,7 @@ export class FollowsDynamoDAO implements FollowsDAO {
         followerAlias,
         followeeAlias: lastAlias
       } : undefined,
+      Limit: pageSize,
     });
 
     const result = await this.client.send(command);
@@ -118,6 +123,7 @@ export class FollowsDynamoDAO implements FollowsDAO {
         followeeAlias,
         followerAlias: lastAlias
       } : undefined,
+      Limit: pageSize,
     });
 
     const result = await this.client.send(command);
@@ -132,5 +138,33 @@ export class FollowsDynamoDAO implements FollowsDAO {
     });
 
     return [aliases, hasMore];
+  }
+
+  async bulkCreateFollowsForFollowee(followeeAlias: string, followerAliases: string[]): Promise<void> {
+    if (!followerAliases || followerAliases.length === 0) return;
+
+    const putRequests = followerAliases.map(followerAlias => ({
+      PutRequest: {
+        Item: {
+          followerAlias,
+          followeeAlias
+        }
+      }
+    }));
+
+    const batches: any[] = [];
+    for (let i = 0; i < putRequests.length; i += BATCH_SIZE) {
+      batches.push(putRequests.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let i = 0; i < batches.length; i++) {
+      const command = new BatchWriteCommand({
+        RequestItems: {
+          "follows": batches[i]
+        }
+      });
+
+      await this.client.send(command);
+    }
   }
 }

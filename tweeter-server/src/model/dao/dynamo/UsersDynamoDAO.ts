@@ -1,12 +1,14 @@
 import { UsersDAO } from "../../service/interfaces/UsersDAO";
 import { StatusDto, UserDto } from "tweeter-shared";
 import {
-  BatchGetCommand,
+  BatchGetCommand, BatchWriteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+
+const BATCH_SIZE = 25
 
 /*
 Schema:
@@ -31,6 +33,31 @@ export class UsersDynamoDAO implements UsersDAO {
     });
 
     await this.client.send(command);
+  }
+
+  async bulkPutUsers(users: UserDto[]): Promise<void> {
+    const putRequests = users.map((user, idx) => ({
+      PutRequest: {
+        Item: {
+          ...user,
+        }
+      }
+    }));
+
+    const batches: any[] = [];
+    for (let i = 0; i < putRequests.length; i += BATCH_SIZE) {
+      batches.push(putRequests.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let i = 0; i < batches.length; i++) {
+      const command = new BatchWriteCommand({
+        RequestItems: {
+          [this.tableName]: batches[i]
+        }
+      });
+
+      await this.client.send(command);
+    }
   }
 
   async getUser(userAlias: string): Promise<UserDto | null> {
