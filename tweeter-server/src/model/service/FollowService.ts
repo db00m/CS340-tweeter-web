@@ -94,8 +94,8 @@ export class FollowService implements Service {
 
     await this.followsDAO.createFollow(currentUserAlias, userAlias);
 
-    const followerCount = await this.getFollowerCount(authToken, currentUserAlias);
-    const followeeCount = await this.getFolloweeCount(authToken, currentUserAlias);
+    const followerCount = await this.getFollowerCount(authToken, userAlias);
+    const followeeCount = await this.getFolloweeCount(authToken, userAlias);
 
     return [followerCount, followeeCount];
   };

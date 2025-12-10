@@ -65,6 +65,12 @@ export class UserService implements Service {
     imageFileExtension: string
   ): Promise<[UserDto, AuthTokenDto]> {
 
+    const existingUser = await this.dao.getUser(alias);
+
+    if (existingUser) {
+      throw new Error("Alias is not available");
+    }
+
     let avatarUrl = ""
 
     if (userImageBytes.length > 0) {

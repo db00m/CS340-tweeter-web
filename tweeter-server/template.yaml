@@ -310,13 +310,19 @@ Resources:
   # SQS Queues  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
   #
 
-  #   MyQueue:
-  #     Type: AWS::SQS::Queue
-  #     Properties:
-  #       QueueName: MyQueue
+  BatcherQueue:
+   Type: AWS::SQS::Queue
+   Properties:
+     QueueName: BatcherQueue
+
+  BatchProcessorQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: BatchProcessorQueue
 
 
-  #
+
+    #
   # Lambda Layer (reused by all Lambda functions)
   #
 
@@ -439,6 +445,9 @@ Resources:
       FunctionName: CreateStatus
       Handler: lambda/status/CreateStatus.handler
       Policies: *commonPolicies
+      Environment:
+        Variables:
+          BATCHER_QUEUE_URL: !Ref BatcherQueue
       Events:
         PostApi:
           Type: Api
@@ -530,6 +539,35 @@ Resources:
             RestApiId: !Ref tweeterApi
             Path: /user
             Method: POST
+
+  FeedBatcherWorker:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: FeedBatcherWorker
+      Handler: lambda/feed/FeedBatcher.handler
+      Policies: *commonPolicies
+      Environment:
+        Variables:
+          PROCESSER_QUEUE_URL: !Ref BatchProcessorQueue
+      Events:
+        QueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt BatcherQueue.Arn
+            BatchSize: 10
+
+  FeedBatchProcessorWorker:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: BatchProcessorWorker
+      Handler: lambda/feed/FeedBatchProcessor.handler
+      Policies: *commonPolicies
+      Events:
+        QueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt BatchProcessorQueue.Arn
+            BatchSize: 10
   #
   # Domain Configuration
   #

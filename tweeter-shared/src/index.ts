@@ -31,3 +31,6 @@ export type { CreateUserRequest } from "./model/net/request/users/CreateUserRequ
 export type { CreateAuthResponse } from "./model/net/response/users/CreateAuthResponse"
 export type { GetUserResponse } from "./model/net/response/users/GetUserResponse"
 
+export type { FeedBatcherRequest } from "./model/net/request/feed/FeedBatcherRequest"
+export type { FeedBatchProcessorRequest } from "./model/net/request/feed/FeedBatchProcessorRequest"
+

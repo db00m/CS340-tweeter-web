@@ -5,18 +5,21 @@ import { FeedDAO } from "./interfaces/FeedDAO";
 import { DAOFactory } from "./interfaces/DAOFactory";
 import { AuthenticationService } from "./AuthenticationService";
 import { FollowsDAO } from "./interfaces/FollowsDAO";
+import { FeedQueueAdapter } from "./interfaces/FeedQueueAdapter";
 
 export class StatusService implements Service {
 
   private storyDAO: StoryDAO;
   private feedDAO: FeedDAO;
   private followsDAO: FollowsDAO;
+  private queueAdapter: FeedQueueAdapter;
   private authorizationService: AuthenticationService;
 
-  constructor(daoFactory: DAOFactory) {
+  constructor(daoFactory: DAOFactory, queueAdapter: FeedQueueAdapter) {
     this.storyDAO = daoFactory.getStoryDAO();
     this.feedDAO = daoFactory.getFeedDAO();
     this.followsDAO = daoFactory.getFollowsDAO();
+    this.queueAdapter = queueAdapter;
     this.authorizationService = new AuthenticationService(daoFactory.getSessionsDAO());
   }
 
@@ -52,14 +55,29 @@ export class StatusService implements Service {
     const currentUser = await this.authorizationService.authenticate(authToken)
 
     await this.storyDAO.addToStory(newStatus);
-    let hasMore = true
-    let lastAlias: string | undefined = undefined;
-    while (hasMore) {
-      const [followerAliases, hasMoreResult] = await this.followsDAO.getPaginatedFollowers(currentUser, 1000, lastAlias);
-      hasMore = hasMoreResult;
-      lastAlias = followerAliases.at(-1);
+    await this.queueAdapter.appendToBatcherQueue({ statusDto: newStatus, authorAlias: currentUser });
+  }
 
-      await this.feedDAO.batchAddToFeed(followerAliases, newStatus);
+  async createBatches(
+    newStatus: StatusDto,
+    authorAlias: string,
+  ): Promise<void> {
+    let shouldContinue = true
+    let lastAlias: string | undefined = undefined
+
+    while(shouldContinue) {
+      const [aliases, hasMore] = await this.followsDAO.getPaginatedFollowers(authorAlias, 100, lastAlias);
+      shouldContinue = hasMore;
+      lastAlias = aliases.at(-1);
+
+      await this.queueAdapter.appendToBatchProcessorQueue({ statusDto: newStatus, followerAliases: aliases })
     }
-  };
+  }
+
+  async appendToFeeds(
+    statusDto: StatusDto,
+    followerAliases: string[],
+  ) {
+    await this.feedDAO.batchAddToFeed(followerAliases, statusDto);
+  }
 }

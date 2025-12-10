@@ -3,9 +3,6 @@ import { FollowDto, StatusDto, UserDto } from "tweeter-shared";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-// It's okay for this DAO to access more than one table.  The DAO is not an abstraction for the table, but an abstraction
-// of the data that is getting fetched.
-
 export class FollowsDynamoDAO implements FollowsDAO {
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
